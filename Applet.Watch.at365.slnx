@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Applet.Watch/Applet.Watch.csproj" />
+  <Project Path="Applet.Watch.RegressionTests/Applet.Watch.RegressionTests.csproj" />
+</Solution>

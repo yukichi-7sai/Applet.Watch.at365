@@ -1,0 +1,224 @@
+{
+  "apiVersion": 1,
+  "id": "at365.watch",
+  "name": "Applet.Watch.at365",
+  "displayName": "Watch",
+  "version": "0.3.0",
+  "minimumHostVersion": "0.36.8",
+  "updateRepository": "yukichi-7sai/Applet.Watch.at365",
+  "runtime": "native",
+  "entry": "Applet.Watch.at365.exe",
+  "description": "デスクトップに半透明の時計を表示します。モニターと位置をAppDockから設定できます。",
+  "capabilities": [
+    "ui",
+    "settings",
+    "notifications"
+  ],
+  "commands": [
+    {
+      "id": "at365.watch.choose-font",
+      "title": "フォントを選ぶ",
+      "description": "Windowsのフォント選択から、時計に使用するフォント名を選びます。"
+    }
+  ],
+  "defaultKeybindings": [
+    {
+      "command": "at365.watch.settings.visible.toggle",
+      "key": "Pause",
+      "enabled": true,
+      "when": {
+        "scope": "global",
+        "appletIds": []
+      }
+    }
+  ],
+  "settings": [
+    {
+      "key": "visible",
+      "automation": true,
+      "generateCommands": [
+        "on",
+        "off",
+        "toggle"
+      ],
+      "title": "時計を表示",
+      "type": "boolean",
+      "default": true,
+      "description": "表示・非表示コマンドから変更した状態も保存します。"
+    },
+    {
+      "key": "monitor",
+      "title": "表示するモニター",
+      "type": "select",
+      "dynamic": true,
+      "default": "primary",
+      "options": [
+        {
+          "label": "メインモニター（自動）",
+          "value": "primary"
+        }
+      ],
+      "description": "Appletを有効にすると接続中のモニターを選べます。未接続の場合はメインに表示します。"
+    },
+    {
+      "key": "alignment",
+      "automation": true,
+      "title": "時計の位置",
+      "type": "select",
+      "default": "top",
+      "options": [
+        {
+          "label": "上端",
+          "value": "top"
+        },
+        {
+          "label": "下端",
+          "value": "bottom"
+        }
+      ],
+      "description": "選んだ画面の上端または下端に時計を配置します。"
+    },
+    {
+      "key": "horizontalMargin",
+      "automation": true,
+      "title": "左右の余白",
+      "type": "number",
+      "default": 20,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": 1,
+      "description": "画面の両端から文字までの距離（DIP）。"
+    },
+    {
+      "key": "verticalMargin",
+      "automation": true,
+      "title": "上下の余白",
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": 1,
+      "description": "選んだ上端／下端からの距離（DIP）。画面内に収まるよう調整します。"
+    },
+    {
+      "key": "fontSize",
+      "automation": true,
+      "title": "時計の文字サイズ",
+      "type": "number",
+      "default": 420,
+      "minimum": 48,
+      "maximum": 720,
+      "step": 1,
+      "description": "元のWatchのサイズは420。画面幅が足りない場合は縮小します。"
+    },
+    {
+      "key": "fontFamily",
+      "title": "フォント",
+      "type": "string",
+      "default": "",
+      "description": "空欄の場合はSegoe UIで表示します。Windowsにインストール済みのフォント名を指定するか、「フォントを選ぶ」から変更できます。指定したフォントが未導入の場合もSegoe UIで表示し、保存済みの名前は保持します。",
+      "minLength": 0,
+      "maxLength": 256
+    },
+    {
+      "key": "opacity",
+      "automation": true,
+      "title": "時計の不透明度",
+      "type": "number",
+      "default": 0.4,
+      "minimum": 0.05,
+      "maximum": 1,
+      "step": 0.05,
+      "description": "0.05〜1。元のWatchの半透明表示は0.4。"
+    },
+    {
+      "key": "showSeconds",
+      "automation": true,
+      "generateCommands": [
+        "on",
+        "off",
+        "toggle"
+      ],
+      "title": "秒を表示",
+      "type": "boolean",
+      "default": true,
+      "description": "時・分の隣に秒を表示します。"
+    },
+    {
+      "key": "showDate",
+      "automation": true,
+      "generateCommands": [
+        "on",
+        "off",
+        "toggle"
+      ],
+      "title": "日付を表示",
+      "type": "boolean",
+      "default": true,
+      "description": "画面右側に日付と曜日を表示します。"
+    }
+  ],
+  "settingSections": [
+    {
+      "id": "clock",
+      "title": "時計の表示",
+      "description": "デスクトップに表示する情報を選びます。",
+      "settings": [
+        "visible",
+        "showSeconds",
+        "showDate"
+      ]
+    },
+    {
+      "id": "position",
+      "title": "表示位置",
+      "description": "モニターと配置、画面端からの余白を設定します。",
+      "settings": [
+        "monitor",
+        "alignment",
+        "horizontalMargin",
+        "verticalMargin"
+      ]
+    },
+    {
+      "id": "appearance",
+      "title": "文字と透明度",
+      "description": "時計の読みやすさを調整します。",
+      "settings": [
+        "fontFamily",
+        "fontSize",
+        "opacity"
+      ]
+    }
+  ],
+  "settingActions": [
+    {
+      "title": "フォントを選ぶ",
+      "command": "at365.watch.choose-font",
+      "description": "Windowsのフォント選択からフォント名を適用します。文字サイズは「時計の文字サイズ」で調整します。"
+    }
+  ],
+  "notificationTypes": [
+    {
+      "typeId": "font-unavailable",
+      "title": "フォント案内",
+      "description": "選択したフォントがこのPCにない場合、代替表示とフォント設定を案内します。",
+      "levels": [
+        "info"
+      ],
+      "defaultLevel": "info",
+      "allowedTargets": [
+        "banner",
+        "desktop",
+        "windows"
+      ],
+      "defaultTargets": [
+        "banner"
+      ],
+      "requiredTargets": [],
+      "lifetimePolicy": "userDuration",
+      "defaultDurationSeconds": null,
+      "history": "persistent"
+    }
+  ]
+}
