@@ -3,7 +3,7 @@
   "id": "at365.watch",
   "name": "Applet.Watch.at365",
   "displayName": "Watch",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "minimumHostVersion": "0.36.8",
   "updateRepository": "yukichi-7sai/Applet.Watch.at365",
   "runtime": "native",

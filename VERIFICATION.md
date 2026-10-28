@@ -1,6 +1,21 @@
 # 検証記録
 
-対象の現行版は`0.3.0`。以下は記録した条件での検証結果であり、外部サービスや実機条件の現在の動作保証とは区別する。
+対象の現行版は`0.3.2`。以下は記録した条件での検証結果であり、外部サービスや実機条件の現在の動作保証とは区別する。
+
+## 2026-10-28: 取り消し版のコミット照合
+
+- 取り消し版0.3.2の全31入力、完全ログのSHA256、発行物全2ファイル・ZIP/feedを実装時の証跡と照合し、一致を確認。Releaseビルド、標準回帰17/17、発行EXEのRPC、固定本体での接続・表示切替・正常終了の成功を再利用する。製品の追加修正・版更新・再発行はない。
+- コミット対象は版番号と取り消し記録だけで、起動コードと開発文書は試行前のまま。本体の並行作業は対象外。必要範囲に不足はなく、製品テストの再実行は行わない。
+- 証跡: `.artifacts/commit-validation-app-id-rollback-20261028/`のreuse.json、stage.json、result.json。stage treeとcommit treeを照合し、GitHub origin/mainへ通常pushした結果とリモート先端の一致を記録する。Release・実利用deployは行わない。
+
+## 2026-10-28: AppUserModelIDの試行を取り消し（0.3.2）
+
+- 0.3.1で本体と共通のAppUserModelIDを設定したが、利用者の実機ではタスクマネージャーの統合表示に効果がなかったため、依頼に従って取り消した。Program.csとDEVELOPMENT.mdは試行前のmain/5145b46とGit blob一致。設定・保存形式・公開API・終了管理は変更していない。
+- 発行済み試行版より新しい取り消し版として0.3.2へパッチ更新。発行前レビューで識別子設定・P/Invoke・追加説明の除去と既存処理の復元を確認し、阻害指摘なし。
+- Releaseビルドは警告・エラー0、既存回帰17/17成功。発行EXEの既存RPC試験（フォント・通知・実FontDialogのOK/取消・終了）、固定AppDock 0.99.16の隔離コピーで接続・表示ON/OFF・正常終了が成功。Pause/F13〜F24の送信・登録なし。
+- publish.batは終了コード0。EXE/manifest/feedの版一致、ZIP全2ファイルのサイズ/SHA256、既存配置スクリプト保持を確認。取り消し版の実利用deployは行っていない。
+- 証跡: `.artifacts/process-app-id-rollback-20261028/`のreview.json、build.log、regression.log、publish.log、published-protocol.log、published-host-result.json、package-result.json、validation.json。試行時の登録API検証と未達結果は`.artifacts/process-app-id-20261028/`に保持する。今回の方式の成功は2回で削除0件。
+- Appletの検証前後の入力は文書追記以外一致。本体では並行する画像関連9ファイルと新規試験の変更を検出して保持した。SDK/Runtime・ビルド依存・固定配布物に変更はなく、今回の固定EXE試験には影響しない。本作業による本体ソース変更・commit・push・Releaseなし。
 
 ## 2026-10-26: 全変更Appletのローカルコミット照合
 
