@@ -9,11 +9,9 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
     private IExtensionContext? context;
     private ClockWindow? clock;
     private IDisposable? settingsSubscription;
-    private ClockFontNotice? fontNotice;
     public async Task ActivateAsync(IExtensionContext services, CancellationToken cancellationToken)
     {
         context = services;
-        fontNotice = new(services.Notifications, services.Log);
         services.Commands.Register(ClockFonts.ChooseCommand, "フォントを選ぶ", async token => {
             var family = await dispatcher.InvokeAsync(() => clock?.ChooseFont());
             token.ThrowIfCancellationRequested();
@@ -27,7 +25,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
         settingsSubscription = services.Settings.OnChanged(ApplyAsync);
         SystemEvents.DisplaySettingsChanged += DisplayChanged;
         await PublishStateAsync(cancellationToken);
-        await PublishFontsAsync(cancellationToken);
     }
     private async Task ApplyAsync(CancellationToken token)
     {
@@ -35,13 +32,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
         var options = ClockOptions.Read(context.Settings);
         await dispatcher.InvokeAsync(() => clock?.Apply(options));
         await PublishStateAsync(token);
-        await PublishFontsAsync(token);
-    }
-    private async Task PublishFontsAsync(CancellationToken token)
-    {
-        if (context is null || clock is null || fontNotice is null) return;
-        var font = await dispatcher.InvokeAsync(() => clock.FontSelection);
-        await fontNotice.UpdateAsync(font, token);
     }
     private async Task PublishMonitorsAsync(CancellationToken token)
     {
@@ -65,7 +55,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
         SystemEvents.DisplaySettingsChanged -= DisplayChanged;
         settingsSubscription?.Dispose();
         context = null;
-        fontNotice = null;
         await dispatcher.InvokeAsync(() => { clock?.Close(); clock = null; });
     }
 }

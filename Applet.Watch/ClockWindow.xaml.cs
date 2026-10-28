@@ -138,7 +138,7 @@ internal partial class ClockWindow : Window
         var selected = ClockLayout.SelectMonitor(Monitors(), options.Monitor);
         return new Panel("Your desktop clock.", "元のWatchの時計を、AppDockから管理します。時計はクリックを透過し、フォーカスを奪いません。", [
             new("表示", NativeWindow.IsWindowVisible(handle) ? "表示中" : "非表示"),
-            new("フォント", FontSelection.DisplayFamily + (FontSelection.NeedsNotice ? "（選択したフォントが未インストール）" : "")),
+            new("フォント", FontSelection.DisplayFamily + (FontSelection.IsUnavailable ? "（選択したフォントが未インストール）" : "")),
             new("モニター", selected.Label + (options.Monitor != "primary" && selected.Id != options.Monitor ? "（未接続のためメインへ退避）" : "")),
             new("位置", options.Alignment == "bottom" ? "下端" : "上端"),
             new("座標", $"{rect.Left}, {rect.Top} · {rect.Right - rect.Left}×{rect.Bottom - rect.Top}")

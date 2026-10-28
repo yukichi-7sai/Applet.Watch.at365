@@ -1,5 +1,4 @@
 using Applets.Watch;
-using AppDock.SDK;
 
 var passed = 0;
 void Check(string name, Action assertion) { assertion(); passed++; Console.WriteLine("PASS " + name); }
@@ -28,47 +27,9 @@ Check("invalid font settings normalize without replacing a valid missing selecti
     Equal(ClockFonts.DefaultFamily, new ClockOptions(FontFamily: new string('x', 257)).Normalize().FontFamily);
     Equal("Missing Font", new ClockOptions(FontFamily: " Missing Font ").Normalize().FontFamily);
 });
-Check("empty default uses Segoe UI without a missing-font condition", () => {
+Check("empty default uses Segoe UI without an unavailable-font status", () => {
     Equal("", new ClockOptions().FontFamily);
     var font = ClockFonts.Select("", Array.Empty<string>());
-    Equal("", font.RequestedFamily); Equal("Segoe UI", font.DisplayFamily); Equal(false, font.NeedsNotice);
+    Equal("", font.RequestedFamily); Equal("Segoe UI", font.DisplayFamily); Equal(false, font.IsUnavailable);
 });
-Check("missing-font notices have no official information action", () => {
-    Equal(0, ClockFonts.Notice(new("Another Font", "Segoe UI", false)).Actions?.Count ?? 0);
-});
-var notices = new FakeNotifications();
-var fontNotice = new ClockFontNotice(notices, new FakeLog());
-await fontNotice.UpdateAsync(new("", "Segoe UI", false), default);
-Check("the empty font default never publishes a notice", () => Equal(0, notices.Published));
-await fontNotice.UpdateAsync(new("Missing Font", "Segoe UI", false), default);
-await fontNotice.UpdateAsync(new("Missing Font", "Segoe UI", false), default);
-Check("unrelated settings changes do not repeat the missing-font notice", () => Equal(1, notices.Published));
-await fontNotice.UpdateAsync(new("", "Segoe UI", false), default);
-Check("clearing the font resolves the original notice without republishing", () => {
-    Equal("resolved", notices.Ended.Single()); Equal(1, notices.Published);
-});
-await fontNotice.UpdateAsync(new("Arial", "Arial", true), default);
-notices.Suppress = true;
-await fontNotice.UpdateAsync(new("Another Font", "Segoe UI", false), default);
-await fontNotice.UpdateAsync(new("Another Font", "Segoe UI", false), default);
-Check("a suppressed font notice is not resent", () => Equal(2, notices.Published));
 Console.WriteLine($"{passed}/{passed} passed");
-
-sealed class FakeNotifications : INotificationService
-{
-    public int Published;
-    public bool Suppress;
-    public List<string> Ended = new();
-    public Task ShowAsync(string title, string body, CancellationToken token = default) => throw new NotSupportedException();
-    public Task<NotificationPublishResult> PublishAsync(NotificationRequest request, CancellationToken token = default)
-    {
-        Published++;
-        return Task.FromResult(new NotificationPublishResult(Suppress ? "suppressed" : "accepted", Suppress ? null : "notice-" + Published, null));
-    }
-    public Task EndAsync(string id, string status = "resolved", CancellationToken token = default) { Ended.Add(status); return Task.CompletedTask; }
-}
-sealed class FakeLog : ILogService
-{
-    public Task InfoAsync(string message, CancellationToken token = default) => Task.CompletedTask;
-    public Task ErrorAsync(string message, CancellationToken token = default) => throw new Exception(message);
-}

@@ -62,6 +62,6 @@ GUI試験にscripts/settings-mcp-check.cjsによる隔離MCP確認を含みま�
 
 ## フォント参照
 
-フォントはWindowsのFonts.SystemFontFamiliesから確認し、保存したfontFamilyを名前で解決します。既定値は空文字で、空欄は正常なSegoe UIの既定表示として扱い、未導入通知を出しません。見つからない場合はSegoe UIで描画し、保存値は置換しません。選択は共通の文字列設定とWindowsのFontDialogから行い、128件の動的select候補上限に依存しません。明示指定したフォントがない場合の案内は共通の種類指定通知を使います。
+フォントはWindowsのFonts.SystemFontFamiliesから確認し、保存したfontFamilyを名前で解決します。既定値は空文字で、空欄は正常なSegoe UIの既定表示として扱います。見つからない場合も通知せずSegoe UIで描画し、保存値は置換しません。選択は共通の文字列設定とWindowsのFontDialogから行い、128件の動的select候補上限に依存しません。通知capabilityと通知種類は宣言しません。
 
 Resources/Hatten.ttfは.gitignore対象として手元に保持し、ビルドのNone/Resource/Contentへ含めません。新規checkoutやTTF不在でもビルド・発行できます。ソース・EXE・ZIPから再配布せず、過去Git履歴の扱いは検証記録を参照してください。

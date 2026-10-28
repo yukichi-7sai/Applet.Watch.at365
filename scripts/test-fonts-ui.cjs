@@ -9,6 +9,7 @@ const {
 } = require("../../AppDock.at365/scripts/publish-paths.cjs");
 const root = path.resolve(__dirname, ".."),
   host = path.resolve(root, "../AppDock.at365");
+const { copyHost } = require(path.join(host, "scripts/copy-host.cjs"));
 const { chromium, _electron: electron } = require(
   path.join(host, "node_modules/playwright"),
 );
@@ -45,7 +46,7 @@ async function launch() {
   let context;
   if (process.argv[2]) {
     const exe = path.join(profile, "AppDock.at365.exe");
-    fs.copyFileSync(path.resolve(process.argv[2]), exe);
+    copyHost(path.resolve(process.argv[2]), exe);
     hostHash = hash(exe);
     assert.equal(hostHash, hash(path.resolve(process.argv[2])));
     const server = net.createServer();
@@ -109,6 +110,18 @@ async function text(label, value) {
   await field.fill(value);
   await field.press("Enter");
 }
+async function selectSettingsPage(pageId) {
+  await page.evaluate(async (pageId) => {
+    await window.dock.navigate("settings");
+    const s = await window.dock.settingsEditing();
+    await window.dock.editSettings({
+      sessionId: s.sessionId,
+      editRevision: s.editRevision,
+      operationId: crypto.randomUUID(),
+      action: { type: "select-page", pageId },
+    });
+  }, pageId);
+}
 (async () => {
   const output = path.join(getPublishDirectory(root), "Applet.Watch.at365");
   const folder = path.join(profile, "extensions/Applet.Watch.at365");
@@ -117,6 +130,9 @@ async function text(label, value) {
     fs.copyFileSync(path.join(output, name), path.join(folder, name));
     assert.equal(hash(path.join(output, name)), hash(path.join(folder, name)));
   }
+  const manifest = read(path.join(folder, "extension.json"));
+  assert(!manifest.capabilities.includes("notifications"));
+  assert.equal(manifest.notificationTypes?.length ?? 0, 0);
   const config = createDefaultSettings();
   config.host.soundEnabled = false;
   config.host.closeToTray = false;
@@ -145,16 +161,12 @@ async function text(label, value) {
   checks.push(
     "published native fallback / ticking / click-through / no activation",
   );
-  await page.evaluate(async () => {
-    await window.dock.navigate("settings");
-    const s = await window.dock.settingsEditing();
-    await window.dock.editSettings({
-      sessionId: s.sessionId,
-      editRevision: s.editRevision,
-      operationId: crypto.randomUUID(),
-      action: { type: "select-page", pageId: "applet:at365.watch" },
-    });
-  });
+  await selectSettingsPage("notifications");
+  await page.getByTestId("notification-speech").waitFor();
+  assert.equal(await page.getByRole("row").filter({ hasText: "Watch" }).count(), 0);
+  assert.equal(await page.getByText("フォント案内", { exact: true }).count(), 0);
+  checks.push("notification settings contain neither font guidance nor legacy Watch notifications");
+  await selectSettingsPage("applet:at365.watch");
   await page.getByLabel("フォント", { exact: true }).waitFor();
   await page
     .getByRole("button", { name: "フォントを選ぶ", exact: true })
@@ -188,6 +200,22 @@ async function text(label, value) {
   await until(() => !read(path.join(profile, "settings.json")).extensions[id].settings.fontFamily, "empty default persisted or omitted");
   assert.equal(await page.getByLabel("フォント", { exact: true }).inputValue(), "");
   checks.push("empty default / clear to Segoe UI / no information button");
+  await text("フォント", "Missing Font Fixture");
+  await until(
+    () => state().requestedFont === "Missing Font Fixture" && state().font === "Segoe UI" && !state().fontInstalled,
+    "missing font falls back without changing saved selection",
+  );
+  await until(
+    () => read(path.join(profile, "settings.json")).extensions[id].settings.fontFamily === "Missing Font Fixture",
+    "missing font name remains saved",
+  );
+  const missingFontPid = state().processId;
+  await page.evaluate(() => window.dock.restartExtension("at365.watch"));
+  await until(
+    () => state().processId !== missingFontPid && state().requestedFont === "Missing Font Fixture" && state().font === "Segoe UI",
+    "restart retains missing font selection and fallback",
+  );
+  checks.push("explicit missing font silently falls back and preserves saved family across restart");
   await text("フォント", "Haettenschweiler");
   await until(
     () => state().requestedFont === "Haettenschweiler",
@@ -223,6 +251,7 @@ async function text(label, value) {
       "horizontalMargin",
       "verticalMargin",
       "fontSize",
+      "fontFamily",
       "opacity",
       "showSeconds",
       "showDate",
@@ -233,12 +262,13 @@ async function text(label, value) {
       horizontalMargin: 22,
       verticalMargin: 12,
       fontSize: 160,
+      fontFamily: "Segoe UI",
       opacity: 0.55,
       showSeconds: true,
       showDate: true,
     },
-    invalid: [{ opacity: 2 }, { alignment: "middle" }, { fontFamily: "Arial" }],
-    hidden: ["monitor", "fontFamily"],
+    invalid: [{ opacity: 2 }, { alignment: "middle" }, { fontFamily: 42 }],
+    hidden: ["monitor"],
     switches: ["showSeconds", "showDate"],
   });
   await until(
@@ -246,7 +276,7 @@ async function text(label, value) {
     "MCP settings reach native clock",
   );
   checks.push(
-    "existing eight MCP public settings / font remains private / validation and persistence",
+    "existing nine MCP public settings / dynamic monitor remains private / validation and persistence",
   );
   await page.evaluate(() =>
     window.dock.executeCommand("at365.watch.settings.visible.off"),

@@ -44,7 +44,7 @@ const peer = new JsonLinePeer(
   await peer.request("settings.changed", settings);
   assert.equal(
     calls.filter((c) => c.method === "host.notifications.publish").length,
-    1,
+    0,
   );
   assert(
     panel.facts.some(
@@ -55,19 +55,13 @@ const peer = new JsonLinePeer(
   await peer.request("settings.changed", settings);
   assert.equal(
     calls.filter((c) => c.method === "host.notifications.publish").length,
-    1,
+    0,
   );
   settings.fontFamily = "";
   await peer.request("settings.changed", settings);
-  assert(
-    calls.some(
-      (c) =>
-        c.method === "host.notifications.end" && c.input.status === "resolved",
-    ),
-  );
+  assert(panel.facts.some((f) => f.label === "フォント" && f.value === "Segoe UI"));
   await assert.rejects(peer.request("command.execute", { id: "at365.watch.font-information" }));
   assert.equal(calls.filter((c) => c.method === "host.browser.open").length, 0);
-  assert(calls.filter((c) => c.method === "host.notifications.publish").every((c) => !c.input.actions?.length));
   const setCalls = () =>
     calls.filter((c) => c.method === "host.settings.set").length;
   const before = setCalls();
@@ -102,10 +96,11 @@ const peer = new JsonLinePeer(
     JSON.stringify(panel.facts),
   );
   await peer.request("deactivate");
+  assert.equal(calls.filter((c) => c.method.startsWith("host.notifications.")).length, 0);
   child.stdin.end();
   assert.equal(await exited, 0, diagnostics);
   console.log(
-    "PASS empty default / missing font fallback / notice deduplication and resolution / removed information command / real font dialog cancel and OK / settings reflection / clean stop",
+    "PASS empty default / missing font fallback without notification calls / removed information command / real font dialog cancel and OK / settings reflection / clean stop",
   );
 })()
   .catch((error) => {
