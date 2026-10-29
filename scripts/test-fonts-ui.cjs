@@ -10,6 +10,7 @@ const {
 const root = path.resolve(__dirname, ".."),
   host = path.resolve(root, "../AppDock.at365");
 const { copyHost } = require(path.join(host, "scripts/copy-host.cjs"));
+const { overlayPage } = require(path.join(host, "scripts/shell-overlay-helper.cjs"));
 const { chromium, _electron: electron } = require(
   path.join(host, "node_modules/playwright"),
 );
@@ -158,6 +159,20 @@ async function selectSettingsPage(pageId) {
   await clockToggle.waitFor();
   assert.equal(await clockToggle.getAttribute("aria-checked"), "false");
   assert.equal(await dateToggle.getAttribute("aria-checked"), "false");
+  for (const [label, key] of [["時計を表示", "visible"], ["日付を表示", "showDate"]]) {
+    const link = page.getByRole("group", { name: label, exact: true }).locator(".command-link");
+    await link.press("Enter");
+    const palette = await overlayPage(page);
+    const command = `at365.watch.settings.${key}.toggle`;
+    await palette.locator(`[role=option][data-command-id="${command}"][aria-selected=true]`).waitFor();
+    assert.equal(await palette.getByRole("combobox").inputValue(), command);
+    assert.equal(state().visible, false);
+    assert.equal(dateState().visible, false);
+    await palette.getByRole("combobox").press("Escape");
+    await palette.locator(".command-palette").waitFor({ state: "hidden" });
+    await until(() => link.evaluate(el => document.activeElement === el), "command link restores focus");
+  }
+  checks.push("both description links select the exact toggle command without executing; Escape restores focus");
   await dateToggle.click();
   await until(() => dateState().visible && !state().visible, "date toggle does not show the clock");
   await dateToggle.click();
@@ -185,6 +200,11 @@ async function selectSettingsPage(pageId) {
   const appearance = page.getByRole("region", { name: "共通の見た目", exact: true });
   await appearance.getByLabel("フォント", { exact: true }).waitFor();
   await appearance.getByRole("button", { name: "フォントを選ぶ", exact: true }).waitFor();
+  const fontField = appearance.getByRole("group", { name: "フォント", exact: true });
+  assert.equal(await fontField.getByLabel("フォント", { exact: true }).count(), 1);
+  assert.equal(await fontField.getByRole("button", { name: "フォントを選ぶ", exact: true }).count(), 1);
+  assert.equal(await appearance.getByRole("group", { name: "フォントを選ぶ", exact: true }).count(), 0);
+  assert.equal(await fontField.locator('[data-setting-item]').count(), 1, "action retains its own search identity");
   await page
     .getByRole("button", { name: "フォントを選ぶ", exact: true })
     .waitFor();
@@ -293,14 +313,29 @@ async function selectSettingsPage(pageId) {
   checks.push("independent date and seconds settings persist after Applet restart");
   const fontButton = appearance.getByRole("button", { name: "フォントを選ぶ", exact: true });
   await until(() => fontButton.isEnabled(), "font action available after restart");
+  await page.getByLabel("フォント", { exact: true }).fill("Arial");
   await fontButton.click();
+  assert(await fontButton.isDisabled(), "picker blocks repeated action execution");
   execFileSync("pwsh.exe", ["-NoProfile", "-File", path.join(__dirname, "test-font-dialog.ps1"), "-WatchProcessId", String(state().processId), "-Action", "cancel"], { windowsHide: true, stdio: "inherit" });
   await until(() => fontButton.isEnabled(), "font dialog cancellation returns to settings");
-  assert.equal(state().requestedFont, "Segoe UI");
-  checks.push("font action in appearance group opens the native picker and cancellation preserves settings");
+  await until(() => state().requestedFont === "Arial", "input commits before opening picker; cancellation preserves it");
+  await text("フォント", "Segoe UI");
+  await fontButton.press("Enter");
+  execFileSync("pwsh.exe", ["-NoProfile", "-File", path.join(__dirname, "test-font-dialog.ps1"), "-WatchProcessId", String(state().processId), "-Action", "choose"], { windowsHide: true, stdio: "inherit" });
+  await until(() => state().requestedFont === "Arial" && fontButton.isEnabled(), "keyboard picker applies choice");
+  assert.equal(await page.getByLabel("フォント", { exact: true }).inputValue(), "Arial");
+  await text("フォント", "Segoe UI");
+  checks.push("same-field picker commits input first / blocks repeated execution / cancel preserves / keyboard OK applies");
   await appearance.scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(profile, "font-settings.png") });
   await page.setViewportSize({ width: 760, height: 800 });
+  await fontField.scrollIntoViewIfNeeded();
+  const bounds = await fontField.boundingBox();
+  for (const control of [fontField.getByLabel("フォント", { exact: true }), fontButton]) {
+    const rect = await control.boundingBox();
+    assert(rect && rect.width > 0 && rect.x >= bounds.x && rect.x + rect.width <= bounds.x + bounds.width + 1);
+  }
+  await page.screenshot({ path: path.join(profile, "font-settings-narrow.png") });
   await datePosition.scrollIntoViewIfNeeded();
   await dateMonitor.selectOption("primary");
   await page.getByLabel("日付の位置", { exact: true }).selectOption("bottom-center");

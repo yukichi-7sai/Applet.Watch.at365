@@ -14,7 +14,7 @@
     <StartupObject>Applets.Watch.Program</StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Resources/Watch.ico</ApplicationIcon>
-    <Version>0.5.2</Version>
+    <Version>0.5.3</Version>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>

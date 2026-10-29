@@ -1,5 +1,19 @@
 # 検証記録
 
+## 2026-10-30: フォント項目内操作0.5.3のコミット前照合
+
+- 利用者の確認後、mainの対象6ファイルと実装時22入力、本体845入力、両配布物695ファイル/ZIPをSHA256で照合。固定AppDock0.105.2とのGUI14群・MCP公開15項目の検証、C#/SDK依存29入力が同じ標準回帰21件を再利用した。本体の宣言読み込み/設定検索に依存する未実施65ファイル731件も成功。製品変更・版更新・再発行なし。
+- 共通証跡は`../AppDock.at365/.artifacts/commit-validation-inline-settings-20261030/`。本repoの`stage.json`・`commits.json`・`push.json`でstage/commit treeとGitHub origin/mainを照合する。既存成功GUI3回と再利用記録を保持し、削除0。GitHub Release・実利用deployは対象外。
+
+## 2026-10-30: フォント項目内の選択操作と表示コマンドリンク 0.5.3
+
+- main clean/追跡先確認とpull --ff-only後に、フォント選択操作へ`settingKey: fontFamily`を追加。入力とボタンを同じFieldへ配置し、狭幅は折り返す。時計/日付の表示descriptionへ、それぞれの生成済みtoggleコマンドのリンクを追加した。リンクは対象を選んだパレットを開き、明示実行まで値を変えない。本体共通拡張を利用し、Watch固有フォーム/CSSやネイティブ処理は追加しない。
+- 発行前レビューで本体0.105.2の契約、設定/コマンドID/既定値/保存/MCPの不変、フォント選択の実行経路を確認し阻害事項なし。表示metadataと説明のみの変更として0.5.2→0.5.3、minimumHostVersionも0.105.2へ更新した。C#・回帰コード・SDK/Runtimeの29入力が先行検証時のSHA256と一致し、標準回帰21件を再利用。模擬RPCの全再試験は行わず、発行EXEと実ホストのGUIで今回影響する操作を検証した。
+- publish.bat終了コード0。ソース/配布/ZIPのmanifest、minimumHostVersion、EXE ProductVersion、feedが一致し、ZIPサイズ/SHA256と全2ファイルの一致、deploy.batの保持を確認。配布先は`A:\40.ARTIFACT\Applet.Watch.at365`。
+- 固定AppDock0.105.2との隔離GUI14群成功。同じFieldに入力と選択ボタンが各1つ存在し、操作の検索識別子も維持。入力のblur確定→選択の取消、処理中無効化、キーボードで選択→Arial適用、Escape取消と再起動保持を確認。両descriptionのリンクは各toggle IDだけを選び、表示状態を変えず、Escapeでリンクへフォーカス復帰する。広幅/760pxの枠内配置と折り返しをPNGで目視確認した。
+- 両表示の初期OFF、個別表示/サイズ/モニター/位置/余白/日付書式、未導入フォントの無通知代替と保存値保持、通知項目なし、再起動/停止も成功。MCP公開15項目のschema/読取/変更、モニター2項目の非公開、不正値/書込不許可の拒否、dryRun、古いrevision拒否、生成コマンドと実プロセスへの反映を再確認した。MCPの仕様変更なし。
+- 証跡は`.artifacts/inline-font-actions-20261030/`の`reuse.json`、`inputs-build.json`、`inputs-after.json`、`publish.log`、`ui-published.log`、`validation.json`。GUIは`.artifacts/independent-display-ui-1793308040928/result.json`、本体レビュー/配布照合は`../AppDock.at365/.artifacts/inline-setting-actions-20261030/`。成功GUIの直近3回を保持し削除0。物理複数モニター/混在DPI等は今回の検証対象外。Pause/F13〜F24を登録/送信せず、実利用設定、commit/push/Release/deployは変更しない。
+
 ## 2026-10-30: 個別表示設定0.5.2のコミット前照合
 
 - 利用者による動作確認後、Watchのmainだけをコミット・GitHubへプッシュする範囲で確認した。origin取得後のHEADとorigin/mainは同一で、別作業のstage内容はなかった。

@@ -5,8 +5,8 @@
   "displayName": "Watch",
   "icon": "clock",
   "tagline": "いつもの画面に、見やすい時計を。",
-  "version": "0.5.2",
-  "minimumHostVersion": "0.36.8",
+  "version": "0.5.3",
+  "minimumHostVersion": "0.105.2",
   "updateRepository": "yukichi-7sai/Applet.Watch.at365",
   "runtime": "native",
   "entry": "Applet.Watch.at365.exe",
@@ -45,7 +45,7 @@
       "title": "時計を表示",
       "type": "boolean",
       "default": false,
-      "description": "時計の表示状態を保存します。日付の表示は個別に切り替えられます。"
+      "description": "日付とは個別に表示できます。[command:at365.watch.settings.visible.toggle] からも切り替えられます。"
     },
     {
       "key": "monitor",
@@ -172,7 +172,7 @@
       "title": "日付を表示",
       "type": "boolean",
       "default": false,
-      "description": "時計の表示状態にかかわらず、日付を表示します。"
+      "description": "時計とは個別に表示できます。[command:at365.watch.settings.showDate.toggle] からも切り替えられます。"
     },
     {
       "key": "secondsFontSize",
@@ -307,9 +307,6 @@
       "settings": [
         "opacity",
         "fontFamily"
-      ],
-      "actions": [
-        "at365.watch.choose-font"
       ]
     },
     {
@@ -356,6 +353,7 @@
     {
       "title": "フォントを選ぶ",
       "command": "at365.watch.choose-font",
+      "settingKey": "fontFamily",
       "description": "時計と日付に共通のフォント名を適用します。文字サイズはそれぞれの表示設定で調整します。"
     }
   ]
