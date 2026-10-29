@@ -5,12 +5,12 @@
   "displayName": "Watch",
   "icon": "clock",
   "tagline": "いつもの画面に、見やすい時計を。",
-  "version": "0.4.1",
+  "version": "0.5.2",
   "minimumHostVersion": "0.36.8",
   "updateRepository": "yukichi-7sai/Applet.Watch.at365",
   "runtime": "native",
   "entry": "Applet.Watch.at365.exe",
-  "description": "デスクトップに半透明の時計を表示します。モニターと位置をAppDockから設定できます。",
+  "description": "半透明の時計と日付をデスクトップに表示します。表示・文字サイズ・モニター・位置をそれぞれ設定できます。",
   "capabilities": [
     "ui",
     "settings"
@@ -19,7 +19,7 @@
     {
       "id": "at365.watch.choose-font",
       "title": "フォントを選ぶ",
-      "description": "Windowsのフォント選択から、時計に使用するフォント名を選びます。"
+      "description": "Windowsのフォント選択から、時計と日付に使用するフォント名を選びます。"
     }
   ],
   "defaultKeybindings": [
@@ -44,8 +44,8 @@
       ],
       "title": "時計を表示",
       "type": "boolean",
-      "default": true,
-      "description": "表示・非表示コマンドから変更した状態も保存します。"
+      "default": false,
+      "description": "時計の表示状態を保存します。日付の表示は個別に切り替えられます。"
     },
     {
       "key": "monitor",
@@ -69,15 +69,31 @@
       "default": "top",
       "options": [
         {
-          "label": "上端",
-          "value": "top"
+          "value": "top",
+          "label": "左上"
         },
         {
-          "label": "下端",
-          "value": "bottom"
+          "value": "top-center",
+          "label": "中央上"
+        },
+        {
+          "value": "top-right",
+          "label": "右上"
+        },
+        {
+          "value": "bottom",
+          "label": "左下"
+        },
+        {
+          "value": "bottom-center",
+          "label": "中央下"
+        },
+        {
+          "value": "bottom-right",
+          "label": "右下"
         }
       ],
-      "description": "選んだ画面の上端または下端に時計を配置します。"
+      "description": "選んだ画面の上端または下端で、左右・中央の配置を選びます。"
     },
     {
       "key": "horizontalMargin",
@@ -88,7 +104,7 @@
       "minimum": 0,
       "maximum": 1000,
       "step": 1,
-      "description": "画面の両端から文字までの距離（DIP）。"
+      "description": "画面の左右端からの余白（DIP）。中央配置では左右の余白を等しく確保します。"
     },
     {
       "key": "verticalMargin",
@@ -110,7 +126,7 @@
       "minimum": 48,
       "maximum": 720,
       "step": 1,
-      "description": "元のWatchのサイズは420。画面幅が足りない場合は縮小します。"
+      "description": "文字サイズ（DIP）。画面幅が足りない場合は秒と同じ比率で縮小します。"
     },
     {
       "key": "fontFamily",
@@ -124,13 +140,13 @@
     {
       "key": "opacity",
       "automation": true,
-      "title": "時計の不透明度",
+      "title": "不透明度",
       "type": "number",
       "default": 0.4,
       "minimum": 0.05,
       "maximum": 1,
       "step": 0.05,
-      "description": "0.05〜1。元のWatchの半透明表示は0.4。"
+      "description": "時計と日付に共通で適用します。0.05〜1。"
     },
     {
       "key": "showSeconds",
@@ -155,25 +171,160 @@
       ],
       "title": "日付を表示",
       "type": "boolean",
-      "default": true,
-      "description": "画面右側に日付と曜日を表示します。"
+      "default": false,
+      "description": "時計の表示状態にかかわらず、日付を表示します。"
+    },
+    {
+      "key": "secondsFontSize",
+      "automation": true,
+      "title": "秒の文字サイズ",
+      "type": "number",
+      "default": 210,
+      "minimum": 24,
+      "maximum": 720,
+      "step": 1,
+      "description": "文字サイズ（DIP）。時・分と独立して指定できます。"
+    },
+    {
+      "key": "dateFontSize",
+      "automation": true,
+      "title": "日付の文字サイズ",
+      "type": "number",
+      "default": 210,
+      "minimum": 24,
+      "maximum": 720,
+      "step": 1,
+      "description": "文字サイズ（DIP）。画面幅が足りない場合は縮小します。"
+    },
+    {
+      "key": "dateFormat",
+      "automation": true,
+      "title": "フォーマット",
+      "type": "select",
+      "default": "M/d ddd",
+      "options": [
+        {
+          "value": "M/d ddd",
+          "label": "月/日 曜日（例: 10/30 Fri）"
+        },
+        {
+          "value": "yyyy/MM/dd",
+          "label": "年/月/日（例: 2026/10/30）"
+        },
+        {
+          "value": "yyyy-MM-dd",
+          "label": "年-月-日（例: 2026-10-30）"
+        },
+        {
+          "value": "M月d日",
+          "label": "月日（例: 10月30日）"
+        },
+        {
+          "value": "M月d日（ddd）",
+          "label": "月日・曜日（例: 10月30日（金））"
+        },
+        {
+          "value": "yyyy年M月d日（ddd）",
+          "label": "年月日・曜日（例: 2026年10月30日（金））"
+        }
+      ]
+    },
+    {
+      "key": "dateMonitor",
+      "title": "表示するモニター",
+      "type": "select",
+      "dynamic": true,
+      "default": "primary",
+      "options": [
+        {
+          "label": "メインモニター（自動）",
+          "value": "primary"
+        }
+      ],
+      "description": "Appletを有効にすると接続中のモニターを選べます。未接続の場合はメインに表示します。"
+    },
+    {
+      "key": "dateAlignment",
+      "automation": true,
+      "title": "日付の位置",
+      "type": "select",
+      "default": "top-right",
+      "options": [
+        {
+          "value": "top",
+          "label": "左上"
+        },
+        {
+          "value": "top-center",
+          "label": "中央上"
+        },
+        {
+          "value": "top-right",
+          "label": "右上"
+        },
+        {
+          "value": "bottom",
+          "label": "左下"
+        },
+        {
+          "value": "bottom-center",
+          "label": "中央下"
+        },
+        {
+          "value": "bottom-right",
+          "label": "右下"
+        }
+      ],
+      "description": "選んだ画面の上端または下端で、左右・中央の配置を選びます。"
+    },
+    {
+      "key": "dateHorizontalMargin",
+      "automation": true,
+      "title": "左右の余白",
+      "type": "number",
+      "default": 20,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": 1,
+      "description": "画面の左右端からの余白（DIP）。中央配置では左右の余白を等しく確保します。"
+    },
+    {
+      "key": "dateVerticalMargin",
+      "automation": true,
+      "title": "上下の余白",
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 1000,
+      "step": 1,
+      "description": "選んだ上端／下端からの距離（DIP）。画面内に収まるよう調整します。"
     }
   ],
   "settingSections": [
     {
+      "id": "appearance",
+      "title": "共通の見た目",
+      "settings": [
+        "opacity",
+        "fontFamily"
+      ],
+      "actions": [
+        "at365.watch.choose-font"
+      ]
+    },
+    {
       "id": "clock",
       "title": "時計の表示",
-      "description": "デスクトップに表示する情報を選びます。",
       "settings": [
         "visible",
         "showSeconds",
-        "showDate"
+        "fontSize",
+        "secondsFontSize"
       ]
     },
     {
       "id": "position",
-      "title": "表示位置",
-      "description": "モニターと配置、画面端からの余白を設定します。",
+      "title": "時計の表示位置",
       "settings": [
         "monitor",
         "alignment",
@@ -182,13 +333,22 @@
       ]
     },
     {
-      "id": "appearance",
-      "title": "文字と透明度",
-      "description": "時計の読みやすさを調整します。",
+      "id": "date",
+      "title": "日付の表示",
       "settings": [
-        "fontFamily",
-        "fontSize",
-        "opacity"
+        "showDate",
+        "dateFormat",
+        "dateFontSize"
+      ]
+    },
+    {
+      "id": "date-position",
+      "title": "日付の表示位置",
+      "settings": [
+        "dateMonitor",
+        "dateAlignment",
+        "dateHorizontalMargin",
+        "dateVerticalMargin"
       ]
     }
   ],
@@ -196,7 +356,7 @@
     {
       "title": "フォントを選ぶ",
       "command": "at365.watch.choose-font",
-      "description": "Windowsのフォント選択からフォント名を適用します。文字サイズは「時計の文字サイズ」で調整します。"
+      "description": "時計と日付に共通のフォント名を適用します。文字サイズはそれぞれの表示設定で調整します。"
     }
   ]
 }

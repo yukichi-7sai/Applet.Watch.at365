@@ -1,11 +1,31 @@
 # 検証記録
 
+## 2026-10-30: 個別表示設定0.5.2のコミット前照合
+
+- 利用者による動作確認後、Watchのmainだけをコミット・GitHubへプッシュする範囲で確認した。origin取得後のHEADとorigin/mainは同一で、別作業のstage内容はなかった。
+- 実装時の31入力、共有依存、完全ログ14件、固定AppDock 0.105.0の隔離EXE、検証済みWatch EXE/manifest、発行ZIP/feedをSHA256・版・サイズへ照合して一致。Releaseビルド、標準回帰21/21、発行EXEのRPC/フォントダイアログ、GUI13群/MCP、配布物確認の成功を再利用した。製品の追加変更がないため、版更新・再発行・同じ試験の再実行は不要と判断した。
+- 差分は今回のWatchの設定・描画・関連試験・文書に限定され、検証範囲の不足やコミットを妨げる指摘はない。物理複数モニター・混在DPI等の未確認範囲は実装時の記録を引き継ぐ。GitHub Releaseと実利用先deployは対象外。
+- 再利用判定は`.artifacts/commit-validation-independent-display-20261030/reuse.json`、stage/commit treeとGitHub origin/mainの照合は同じ場所の`stage.json`・`result.json`へ記録する。実装時の検証資料を保持する。
+
+## 2026-10-30: 時計・秒・日付の個別設定（0.5.2）
+
+- Watchのmainがcleanでorigin/mainを追跡することを確認し、`pull --ff-only`で最新取得後に実装。本体では別作業の変更が進行しているため、その製品ソースは変更していない。通常環境でのpullはAlready up to date。制限環境のDNS失敗・診断なしの.NETビルド失敗は、同じ処理を通常のWindows環境で再実行して解消した。
+- 時計と日付を別々のWindowへ分離。表示・モニター・上下左右の6配置・左右/上下の余白・文字サイズを個別化し、時計・日付の表示はともに既定OFF。既存の保存キー・表示コマンドIDと明示的な保存値は維持。秒の文字サイズも追加し、既定は時計420・秒210・日付210。フォントと不透明度は共通。日付書式は表示例付きの6候補を用意した。
+- 共通設定フォームは5グループ。共通の見た目を「不透明度 → フォント → フォントを選ぶ」の順にし、フォント名の直下へ操作を配置した。同じ入力項目内へのボタン配置に必要な本体拡張は今回の範囲に含めない。由来を説明する表記は設定説明・状態パネル・現行ガイドから除去した。
+- 発行前レビューで設定定義と17項目の配置、個別Windowの停止・DPI・モニター代替、設定/コマンド互換、フォント代替と取消、通知なし、共有依存への影響を確認。状態パネルの既存表示/非表示操作も保持した。設定追加のため0.4.1→0.5.0とし、発行後の描画記録補正と配置調整は0.5.1、検証PNGの右端を含む記録範囲補正は0.5.2として発行した。後者の画像処理はテスト用環境変数指定時だけ動作する。
+- 最終Releaseビルドは警告0・エラー0。標準回帰21/21成功。最終差分で回帰対象のOptions/Layout/Fonts/Formatting・回帰コード・SDK入力のSHA256が不変であることを照合して成功を再利用した。空設定の両方OFF、明示ONの維持、各サイズと配置の独立、負座標/DPI換算、未接続モニター、書式と日付境界を含む。
+- 発行EXEの模擬ホストRPCは成功。両方OFFでタイマー停止、日付だけ/時計だけ/両方の表示、サイズ変更、6方向それぞれの実コンテンツ座標、モニター候補の2項目公開、フォント代替・標準FontDialogのOK/取消、通知API呼出し0、正常終了を確認した。
+- 固定AppDock 0.105.0の隔離コピーでGUI13群成功。両方の初期OFF、独立したON/OFFと時計/秒/日付サイズ、日付書式・位置・余白・モニター選択、保存と再起動復元、フォント入力のEscape取消、直下のボタンからの標準ダイアログ起動/取消、未導入フォントの保存値保持、760px幅で操作へ到達できること、15項目のMCP公開/型検証/権限/dryRun/revision競合、Applet無効化とホスト終了を確認。広幅・狭幅の画面と時計/日付の描画PNGを目視確認した。
+- 最終publishの終了コード0。ソース/配置/ZIPのmanifest、EXE ProductVersion、feedが0.5.2で一致。ZIP全2ファイルのサイズ/SHA256、既存deploy.bat/配置スクリプトの保持を確認。検証前後の全記録入力に差分なし。配布先は`A:\40.ARTIFACT\Applet.Watch.at365`。
+- 証跡は`.artifacts/independent-display-20261030/`の`inputs-final.json`・`review-final.json`・`build-052.log`・`regression.log`・`protocol-published-052.log`・`ui-published-052.log`・`package-result.json`・`validation.json`・`log-hashes.json`。最終GUIは`.artifacts/independent-display-ui-1793306710803/result.json`。先行試行のログも区別して保持。試験方式別の最新3回を残す整理結果は`cleanup.json`を参照する。GUI2回と既存再利用証跡は保持した。
+- 実機は3840×2160・DPI144の1モニター。物理的な別モニター同時表示、混在DPI、モニター抜き差し、スリープ/RDPは未確認。Pause/F13〜F24の送信・OS登録は行っていない。実利用設定・他Applet・本体製品ソースの変更、commit/push、GitHub Release、実利用先deployは行っていない。
+
 ## 2026-10-29: 情報metadataのコミット前照合
 
 - icon/taglineと版の変更、配置manifest/entry、更新ZIP/feedを先行発行時の入力とSHA256へ照合し一致。本体0.101.9の固定EXEでも既存8Appletの情報表示を確認した。実装入力は不変で、先行の発行・表示試験を再利用し、追加の版更新・再発行は行わない。
 - 共通レビューと再利用判断は`../AppDock.at365/.artifacts/commit-validation-applet-information-20261029/{review,reuse,validation}.json`、stage/commitとGitHub origin/mainの照合結果は同じ場所の`stage.json`・`commits.json`・`push.json`を参照する。先行の検証資料は保持。実サービス・実利用のApplet起動・GitHub Release・実利用deployは今回の検証対象外。
 
-対象の現行版は`0.4.1`。以下は記録した条件での検証結果であり、外部サービスや実機条件の現在の動作保証とは区別する。
+上記照合時の対象版は`0.4.1`。以下は記録した条件での検証結果であり、外部サービスや実機条件の現在の動作保証とは区別する。
 
 ## 2026-10-29: Applet情報のアイコンとキャッチコピー 0.4.1
 

@@ -2,7 +2,7 @@ const fs = require("node:fs"),
   path = require("node:path"),
   net = require("node:net");
 const assert = require("node:assert/strict");
-const { spawn } = require("node:child_process");
+const { spawn, execFileSync } = require("node:child_process");
 const { createHash } = require("node:crypto");
 const {
   getPublishDirectory,
@@ -19,7 +19,7 @@ const { createDefaultSettings } = require(
 const profile = path.join(
     root,
     ".artifacts",
-    `installed-fonts-ui-${Date.now()}`,
+    `independent-display-ui-${Date.now()}`,
   ),
   probe = path.join(profile, "clock");
 const id = "at365.watch",
@@ -28,6 +28,7 @@ const hash = (file) =>
   createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const read = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
 const state = () => read(path.join(probe, "clock-state.json"));
+const dateState = () => read(path.join(probe, "date-state.json"));
 async function until(fn, label, timeout = 60000) {
   const end = Date.now() + timeout;
   while (Date.now() < end) {
@@ -148,6 +149,19 @@ async function selectSettingsPage(pageId) {
   config.globalShortcutCommands = [];
   fs.writeFileSync(path.join(profile, "settings.json"), JSON.stringify(config));
   await launch();
+  await until(() => !state().visible && !dateState().visible, "both displays default to off");
+  assert.equal(state().timerRunning, false);
+  assert.equal(dateState().timerRunning, false);
+  await selectSettingsPage("applet:at365.watch");
+  const clockToggle = page.getByRole("switch", { name: "時計を表示", exact: true });
+  const dateToggle = page.getByRole("switch", { name: "日付を表示", exact: true });
+  await clockToggle.waitFor();
+  assert.equal(await clockToggle.getAttribute("aria-checked"), "false");
+  assert.equal(await dateToggle.getAttribute("aria-checked"), "false");
+  await dateToggle.click();
+  await until(() => dateState().visible && !state().visible, "date toggle does not show the clock");
+  await dateToggle.click();
+  await clockToggle.click();
   const initial = await until(
     () => state().visible && state(),
     "clock visible",
@@ -168,6 +182,9 @@ async function selectSettingsPage(pageId) {
   checks.push("notification settings contain neither font guidance nor legacy Watch notifications");
   await selectSettingsPage("applet:at365.watch");
   await page.getByLabel("フォント", { exact: true }).waitFor();
+  const appearance = page.getByRole("region", { name: "共通の見た目", exact: true });
+  await appearance.getByLabel("フォント", { exact: true }).waitFor();
+  await appearance.getByRole("button", { name: "フォントを選ぶ", exact: true }).waitFor();
   await page
     .getByRole("button", { name: "フォントを選ぶ", exact: true })
     .waitFor();
@@ -228,13 +245,69 @@ async function selectSettingsPage(pageId) {
   );
   await text("フォント", "Segoe UI");
   await text("時計の文字サイズ", "180");
+  await text("秒の文字サイズ", "72");
+  await text("日付の文字サイズ", "96");
+  await page.getByLabel("フォーマット", { exact: true }).selectOption("M月d日（ddd）");
   await page.getByLabel("時計の位置", { exact: true }).selectOption("bottom");
+  await page.getByLabel("日付の位置", { exact: true }).selectOption("top-right");
+  await dateToggle.click();
   await until(
     () =>
       state().top > state().monitor.Top && state().requestedFont === "Segoe UI",
     "bottom placement",
   );
+  await until(() => state().secondsFontSize === 72 && dateState().fontSize === 96 && dateState().visible, "independent sizes and date visibility");
+  assert.match(dateState().text, /^\d+月\d+日（[日月火水木金土]）$/);
+  assert.equal(state().configuredFontSize, 180);
+  const datePosition = page.getByRole("region", { name: "日付の表示位置", exact: true });
+  const clockPosition = page.getByRole("region", { name: "時計の表示位置", exact: true });
+  const dateVertical = datePosition.getByLabel("上下の余白", { exact: true });
+  await dateVertical.fill("36"); await dateVertical.press("Enter");
+  const dateHorizontal = datePosition.getByLabel("左右の余白", { exact: true });
+  await dateHorizontal.fill("44"); await dateHorizontal.press("Enter");
+  await until(() => dateState().verticalMargin === 36 && dateState().horizontalMargin === 44, "date margins apply independently");
+  assert.equal(state().verticalMargin, 0);
+  assert.equal(state().horizontalMargin, 20);
+  const clockMonitor = clockPosition.getByLabel("表示するモニター", { exact: true });
+  const dateMonitor = datePosition.getByLabel("表示するモニター", { exact: true });
+  const monitorOptions = await dateMonitor.locator("option").evaluateAll((options) => options.map((o) => ({value:o.value, text:o.textContent})));
+  const physicalMonitors = monitorOptions.filter((o) => o.value !== "primary");
+  assert(physicalMonitors.length > 0);
+  await dateMonitor.selectOption(physicalMonitors[physicalMonitors.length - 1].value);
+  await until(() => dateState().requestedMonitor === physicalMonitors[physicalMonitors.length - 1].value, "independent date monitor selection");
+  assert.equal(await clockMonitor.inputValue(), "primary");
+  await clockToggle.click();
+  await until(() => !state().visible && dateState().visible, "clock OFF retains date");
+  await clockToggle.click();
+  await until(() => state().visible && dateState().visible, "independent display toggles");
+  checks.push("both default OFF / independent switches, sizes, format, monitor and margins / grouped font action");
+  await text("秒の文字サイズ", "100");
+  await until(() => state().secondsFontSize === 100, "seconds size changes independently");
+  assert.equal(state().fontSize, 180);
+  assert.equal(dateState().fontSize, 96);
+  const independentPid = state().processId;
+  await page.evaluate(() => window.dock.restartExtension("at365.watch"));
+  await until(() => state().processId !== independentPid && dateState().processId === state().processId && state().visible && dateState().visible && state().secondsFontSize === 100 && dateState().fontSize === 96, "independent settings restored after restart");
+  assert.equal(dateState().verticalMargin, 36);
+  assert.equal(dateState().horizontalMargin, 44);
+  checks.push("independent date and seconds settings persist after Applet restart");
+  const fontButton = appearance.getByRole("button", { name: "フォントを選ぶ", exact: true });
+  await until(() => fontButton.isEnabled(), "font action available after restart");
+  await fontButton.click();
+  execFileSync("pwsh.exe", ["-NoProfile", "-File", path.join(__dirname, "test-font-dialog.ps1"), "-WatchProcessId", String(state().processId), "-Action", "cancel"], { windowsHide: true, stdio: "inherit" });
+  await until(() => fontButton.isEnabled(), "font dialog cancellation returns to settings");
+  assert.equal(state().requestedFont, "Segoe UI");
+  checks.push("font action in appearance group opens the native picker and cancellation preserves settings");
+  await appearance.scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(profile, "font-settings.png") });
+  await page.setViewportSize({ width: 760, height: 800 });
+  await datePosition.scrollIntoViewIfNeeded();
+  await dateMonitor.selectOption("primary");
+  await page.getByLabel("日付の位置", { exact: true }).selectOption("bottom-center");
+  await until(() => dateState().alignment === "bottom-center" && dateState().requestedMonitor === "primary", "narrow settings controls reachable");
+  await page.screenshot({ path: path.join(profile, "date-settings-narrow.png") });
+  checks.push("narrow settings allow access to date monitor and placement");
+  await page.setViewportSize({ width: 1200, height: 900 });
   fs.copyFileSync(
     path.join(probe, "clock.png"),
     path.join(profile, "clock-font.png"),
@@ -255,6 +328,7 @@ async function selectSettingsPage(pageId) {
       "opacity",
       "showSeconds",
       "showDate",
+      "secondsFontSize", "dateFontSize", "dateFormat", "dateAlignment", "dateHorizontalMargin", "dateVerticalMargin",
     ],
     changes: {
       visible: true,
@@ -266,9 +340,15 @@ async function selectSettingsPage(pageId) {
       opacity: 0.55,
       showSeconds: true,
       showDate: true,
+      secondsFontSize: 64,
+      dateFontSize: 88,
+      dateFormat: "yyyy-MM-dd",
+      dateAlignment: "top-center",
+      dateHorizontalMargin: 25,
+      dateVerticalMargin: 18,
     },
-    invalid: [{ opacity: 2 }, { alignment: "middle" }, { fontFamily: 42 }],
-    hidden: ["monitor"],
+    invalid: [{ opacity: 2 }, { alignment: "middle" }, { fontFamily: 42 }, { secondsFontSize: 0 }, { dateFormat: "invalid" }, { dateAlignment: "middle" }],
+    hidden: ["monitor", "dateMonitor"],
     switches: ["showSeconds", "showDate"],
   });
   await until(
@@ -276,7 +356,7 @@ async function selectSettingsPage(pageId) {
     "MCP settings reach native clock",
   );
   checks.push(
-    "existing nine MCP public settings / dynamic monitor remains private / validation and persistence",
+    "all fifteen MCP public settings / both dynamic monitors remain private / validation and persistence",
   );
   await page.evaluate(() =>
     window.dock.executeCommand("at365.watch.settings.visible.off"),
@@ -312,6 +392,7 @@ async function selectSettingsPage(pageId) {
     checks,
     preferredFontInstalled: preferred.fontInstalled,
     hostHash,
+    physicalMonitors,
   };
   fs.writeFileSync(
     path.join(profile, "result.json"),

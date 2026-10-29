@@ -8,6 +8,7 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
 {
     private IExtensionContext? context;
     private ClockWindow? clock;
+    private ClockWindow? date;
     private IDisposable? settingsSubscription;
     public async Task ActivateAsync(IExtensionContext services, CancellationToken cancellationToken)
     {
@@ -20,7 +21,11 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
                 await ApplyAsync(token);
             }
         });
-        await dispatcher.InvokeAsync(() => { clock = new ClockWindow(); clock.Apply(ClockOptions.Read(services.Settings)); });
+        await dispatcher.InvokeAsync(() => {
+            var options = ClockOptions.Read(services.Settings);
+            clock = new ClockWindow(); date = new ClockWindow(dateOnly: true);
+            clock.Apply(options); date.Apply(options);
+        });
         await PublishMonitorsAsync(cancellationToken);
         settingsSubscription = services.Settings.OnChanged(ApplyAsync);
         SystemEvents.DisplaySettingsChanged += DisplayChanged;
@@ -30,7 +35,7 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
     {
         if (context is null) return;
         var options = ClockOptions.Read(context.Settings);
-        await dispatcher.InvokeAsync(() => clock?.Apply(options));
+        await dispatcher.InvokeAsync(() => { clock?.Apply(options); date?.Apply(options); });
         await PublishStateAsync(token);
     }
     private async Task PublishMonitorsAsync(CancellationToken token)
@@ -38,11 +43,12 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
         if (context is null) return;
         var options = await dispatcher.InvokeAsync(ClockWindow.MonitorOptions);
         await context.Settings.SetOptionsAsync("monitor", options, token);
+        await context.Settings.SetOptionsAsync("dateMonitor", options, token);
     }
     private async Task PublishStateAsync(CancellationToken token)
     {
-        if (context is null || clock is null) return;
-        var panel = await dispatcher.InvokeAsync(() => clock.StatePanel(context.ExtensionId));
+        if (context is null || clock is null || date is null) return;
+        var panel = await dispatcher.InvokeAsync(() => clock.StatePanel(context.ExtensionId, date));
         await context.Ui.ShowPanelAsync(panel, token);
     }
     private async void DisplayChanged(object? sender, EventArgs e)
@@ -55,6 +61,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher) : IAppDockExtension
         SystemEvents.DisplaySettingsChanged -= DisplayChanged;
         settingsSubscription?.Dispose();
         context = null;
-        await dispatcher.InvokeAsync(() => { clock?.Close(); clock = null; });
+        await dispatcher.InvokeAsync(() => { clock?.Close(); date?.Close(); clock = null; date = null; });
     }
 }

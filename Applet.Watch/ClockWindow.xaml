@@ -11,7 +11,7 @@
     </Style>
   </Window.Resources>
   <Grid x:Name="ClockContent" IsHitTestVisible="False">
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+    <StackPanel x:Name="TimeContent" Orientation="Horizontal" HorizontalAlignment="Left">
       <TextBlock x:Name="Hours" /><TextBlock x:Name="Seconds" />
     </StackPanel>
     <TextBlock x:Name="Date" HorizontalAlignment="Right" />

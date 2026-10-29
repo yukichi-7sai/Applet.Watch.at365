@@ -32,4 +32,62 @@ Check("empty default uses Segoe UI without an unavailable-font status", () => {
     var font = ClockFonts.Select("", Array.Empty<string>());
     Equal("", font.RequestedFamily); Equal("Segoe UI", font.DisplayFamily); Equal(false, font.IsUnavailable);
 });
+Check("new installations keep both displays off and retain appearance defaults", () => {
+    var options = ClockOptions.Read(new TestSettings(new()));
+    Equal(false, options.Visible); Equal(false, options.ShowDate); Equal(true, options.ShowSeconds);
+    Equal(420d, options.FontSize); Equal(210d, options.SecondsFontSize); Equal(210d, options.DateFontSize);
+    Equal(0.4, options.Opacity); Equal("top", options.Alignment); Equal("top-right", options.DateAlignment);
+});
+Check("saved visibility and clock settings override the new defaults", () => {
+    var options = ClockOptions.Read(new TestSettings(new() { ["visible"] = true, ["showDate"] = true, ["fontSize"] = 160d, ["monitor"] = "left", ["alignment"] = "bottom" }));
+    Equal(true, options.Visible); Equal(true, options.ShowDate); Equal(160d, options.FontSize); Equal("left", options.Monitor); Equal("bottom", options.Alignment);
+});
+Check("date remains enabled when the clock is disabled", () => {
+    var options = new ClockOptions(Visible: false, ShowDate: true).Normalize();
+    Equal(false, options.Visible); Equal(true, options.ShowDate);
+});
+Check("clock, seconds and date sizes are independent", () => {
+    var options = new ClockOptions(FontSize: 160, SecondsFontSize: 320, DateFontSize: 80).Normalize();
+    Equal(160d, options.FontSize); Equal(320d, options.SecondsFontSize); Equal(80d, options.DateFontSize);
+});
+Check("date monitor and margins are independent of the clock", () => {
+    var options = new ClockOptions(Monitor: "main", VerticalMargin: 10, DateMonitor: "left", DateAlignment: "bottom-right", DateHorizontalMargin: 40, DateVerticalMargin: 30).Normalize();
+    Equal("main", options.Monitor); Equal(10d, options.VerticalMargin);
+    Equal("left", options.DatePlacement.Monitor); Equal(40d, options.DatePlacement.HorizontalMargin);
+    Equal(new PixelBounds(-1920, 375, 1920, 300), ClockLayout.Place(left, 200, 1.5, options.DatePlacement));
+});
+Check("all six anchors retain their vertical edge", () => {
+    foreach (var anchor in new[] { "top", "top-center", "top-right", "bottom", "bottom-center", "bottom-right" }) {
+        var options = new ClockOptions(Alignment: anchor, DateAlignment: anchor).Normalize();
+        Equal(anchor, options.Alignment); Equal(anchor, options.DateAlignment);
+        Equal(anchor.StartsWith("bottom") ? 1230 : 10, ClockLayout.Place(primary, 200, 1, options with { VerticalMargin = 10 }).Top);
+    }
+});
+Check("invalid independent settings fall back without losing valid fields", () => {
+    var options = new ClockOptions(SecondsFontSize: double.NaN, DateFontSize: double.PositiveInfinity, DateMonitor: " ", DateAlignment: "invalid", DateHorizontalMargin: -5, DateVerticalMargin: double.NaN, DateFormat: "invalid").Normalize();
+    Equal(210d, options.SecondsFontSize); Equal(210d, options.DateFontSize); Equal("primary", options.DateMonitor);
+    Equal("top-right", options.DateAlignment); Equal(0d, options.DateHorizontalMargin); Equal(0d, options.DateVerticalMargin); Equal("M/d ddd", options.DateFormat);
+});
+Check("date format retains the default English weekday and supports Japanese formats", () => {
+    var date = new DateTime(2026, 10, 30);
+    Equal("10/30 Fri", ClockFormatting.DateText(date, "M/d ddd"));
+    Equal("2026/10/30", ClockFormatting.DateText(date, "yyyy/MM/dd"));
+    Equal("2026-10-30", ClockFormatting.DateText(date, "yyyy-MM-dd"));
+    Equal("10月30日", ClockFormatting.DateText(date, "M月d日"));
+    Equal("10月30日（金）", ClockFormatting.DateText(date, "M月d日（ddd）"));
+    Equal("2026年10月30日（金）", ClockFormatting.DateText(date, "yyyy年M月d日（ddd）"));
+    Equal("10/30 Fri", ClockFormatting.DateText(date, "invalid"));
+});
+Check("date formatting crosses day, year and leap-day boundaries", () => {
+    Equal("2027/01/01", ClockFormatting.DateText(new DateTime(2026, 12, 31, 23, 59, 59).AddSeconds(1), "yyyy/MM/dd"));
+    Equal("2028/02/29", ClockFormatting.DateText(new DateTime(2028, 2, 28).AddDays(1), "yyyy/MM/dd"));
+});
 Console.WriteLine($"{passed}/{passed} passed");
+
+sealed class TestSettings(Dictionary<string, object> values) : AppDock.SDK.ISettingsService
+{
+    public T Get<T>(string key, T fallback) => values.TryGetValue(key, out var value) && value is T result ? result : fallback;
+    public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    public IDisposable OnChanged(Func<CancellationToken, Task> handler) => throw new NotSupportedException();
+    public Task SetOptionsAsync(string key, IReadOnlyList<AppDock.SDK.SettingOption> options, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+}

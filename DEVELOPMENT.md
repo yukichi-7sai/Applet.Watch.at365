@@ -42,7 +42,9 @@ node scripts/test-ui.cjs
 node scripts/test-ui.cjs ../../40.ARTIFACT/AppDock.at365/win-unpacked/AppDock.at365.exe
 ```
 
-UIテストは隔離profileへApplet EXEを配置し、時計の描画・インストール済みフォントと代替表示・設定反映・コマンド・終了を検証します。グローバルNodeは不要で、ホストの`.tools/node/24.21.0/node.exe`でも実行できます。実利用のAppDock設定、元Watchのプロセス、壁紙、マウス位置を変更しません。検証範囲と未確認項目は[VERIFICATION.md](VERIFICATION.md)を参照してください。
+UIテストは隔離profileへApplet EXEを配置し、時計と日付の独立表示・サイズ・位置・書式、フォント選択と代替表示、設定反映・コマンド・終了を検証します。Nodeはホストのtoolchain.jsonに従う`.tools/node/<version>/node.exe`を使います。実利用のAppDock設定、他のプロセス、壁紙、マウス位置を変更しません。検証範囲と未確認項目は[VERIFICATION.md](VERIFICATION.md)を参照してください。
+
+時計と日付は同じ`ClockWindow`を用途別に2つ生成し、表示・タイマー・DPI・モニター配置を個別に管理します。`ClockOptions`とmanifestで既定値を揃え、`visible`は時計、`showDate`は日付の独立した表示を保存します。フォントと不透明度は共有し、秒のサイズは時・分と独立しています。両WindowとSystemEvents購読はApplet停止時に解放します。日付書式は`ClockFormatting`で宣言済み候補を処理します。
 
 Appletのnative実装とホストとの接続は、[AppDockのApplet実装ガイド](../AppDock.at365/docs/applet-development.md)を参照してください。
 
