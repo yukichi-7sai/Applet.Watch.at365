@@ -5,8 +5,8 @@
   "displayName": "Watch",
   "icon": "clock",
   "tagline": "いつもの画面に、見やすい時計を。",
-  "version": "0.5.3",
-  "minimumHostVersion": "0.105.2",
+  "version": "0.5.4",
+  "minimumHostVersion": "0.105.8",
   "updateRepository": "yukichi-7sai/Applet.Watch.at365",
   "runtime": "native",
   "entry": "Applet.Watch.at365.exe",
@@ -354,6 +354,8 @@
       "title": "フォントを選ぶ",
       "command": "at365.watch.choose-font",
       "settingKey": "fontFamily",
+      "placement": "below",
+      "appearance": "filled",
       "description": "時計と日付に共通のフォント名を適用します。文字サイズはそれぞれの表示設定で調整します。"
     }
   ]

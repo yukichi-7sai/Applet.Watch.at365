@@ -137,6 +137,7 @@ async function selectSettingsPage(pageId) {
   assert.equal(manifest.notificationTypes?.length ?? 0, 0);
   const config = createDefaultSettings();
   config.host.soundEnabled = false;
+  config.host.theme = "light";
   config.host.closeToTray = false;
   config.extensions[id] = {
     enabled: true,
@@ -191,7 +192,7 @@ async function selectSettingsPage(pageId) {
     "published native fallback / ticking / click-through / no activation",
   );
   await selectSettingsPage("notifications");
-  await page.getByTestId("notification-speech").waitFor();
+  await page.getByTestId("notification-delivery").waitFor();
   assert.equal(await page.getByRole("row").filter({ hasText: "Watch" }).count(), 0);
   assert.equal(await page.getByText("フォント案内", { exact: true }).count(), 0);
   checks.push("notification settings contain neither font guidance nor legacy Watch notifications");
@@ -327,9 +328,16 @@ async function selectSettingsPage(pageId) {
   await text("フォント", "Segoe UI");
   checks.push("same-field picker commits input first / blocks repeated execution / cancel preserves / keyboard OK applies");
   await appearance.scrollIntoViewIfNeeded();
+  const assertFontButtonBelow = async () => {
+    const input = await fontField.getByLabel("フォント", { exact: true }).boundingBox();
+    const button = await fontButton.boundingBox();
+    assert(button.y >= input.y + input.height, "font action is below input within the same field");
+  };
+  await assertFontButtonBelow();
   await page.screenshot({ path: path.join(profile, "font-settings.png") });
   await page.setViewportSize({ width: 760, height: 800 });
   await fontField.scrollIntoViewIfNeeded();
+  await assertFontButtonBelow();
   const bounds = await fontField.boundingBox();
   for (const control of [fontField.getByLabel("フォント", { exact: true }), fontButton]) {
     const rect = await control.boundingBox();

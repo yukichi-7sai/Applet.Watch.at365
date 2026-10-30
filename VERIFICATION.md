@@ -1,5 +1,20 @@
 # 検証記録
 
+## 2026-10-30: フォントボタン0.5.4のコミット・プッシュ照合
+
+- 利用者の動作確認後、本体とWatchのmainをコミット・GitHubへプッシュする範囲で確認した。Watchのorigin/mainとHEADは一致し、今回の6ファイルだけを対象にする。
+- 実装時のソース・試験・共有依存871入力、ネイティブ21件の対象29入力、固定GUI14群/MCPの結果・EXEと発行ZIP/payloadを照合し、成功を再利用した。本体の共通UIと宣言検証も再利用/追加回帰を合わせて必要範囲が成功。製品の追加修正は不要で、確認済み0.5.4を維持し再発行しない。
+- 証跡は`../AppDock.at365/.artifacts/commit-validation-action-presentation-20261030/`のreuse.json、validation.json、stage.json、commits.json、push.json。発行時の物理複数モニター/混在DPIの未確認範囲は継続。既存証跡を保持し、GitHub Release・実利用先deployは行わない。
+
+## 2026-10-30: フォント選択ボタンの下段配置・塗りつぶし（0.5.4）
+
+- main `8ce78e6`から、fontFamilyに結合した設定操作へ`placement: below`と`appearance: filled`を指定。共通Field内で入力欄の下へ置き、ライトでは灰色にする。文字ボタンを維持し、Applet固有のCSSやC#処理は追加しない。最低本体版を0.105.8へ揃えた。設定項目・既定値・保存ファイルの増減がないためパッチ更新。
+- 本体側と合わせて発行前レビュー済み。共通部品の余白と既存文字ボタンへの影響を修正後、型検査/build・関連50件・開発GUI7群成功。本体0.105.8とWatch0.5.4のpublish成功。ネイティブ標準21件はC#/SDK/runtime等29入力のSHA256一致を確認して既存成功を再利用した。
+- 固定EXEの隔離試験14群成功。広幅/760幅で同じField内の入力欄の下にボタンが配置され、実画面の灰色面を確認。Windowsフォント選択のクリック/キーボード、確定/取消、入力の先行保存、再起動保持、未導入フォントの無通知代替、個別表示と両表示既定OFFを確認した。MCP15公開項目・モニター2項目の非公開・不正値拒否・書込み許可・dryRun・revisionと実プロセス反映も成功。MCP仕様の変更なし。
+- 初回試験は以前の通知画面を前提に閉じた「読み上げ」の表示を待機して停止。現行画面の準備条件へ試験だけ修正し、同じ発行版で再検証成功。初回失敗記録を保持する。物理複数モニター/混在DPIは今回未検証、Pause/F13〜F24のOS登録・送信なし。
+- 証跡は`../AppDock.at365/.artifacts/action-presentation-20261030/`のreview.json、native-reuse.json、inputs-final.json、publish-watch.log、watch-published-final.log、packages.json、validation.json。GUIは`.artifacts/independent-display-ui-1793337532502/result.json`。ZIP内2ファイルと発行payload、manifest/minimumHostVersion、feed/版/サイズ/SHA256を照合済み。
+- 旧成功GUI3件の本体ランタイムコピー2,076ファイルだけを整理。結果・画像・設定・manifest等323ファイルはSHA256不変、最新成功コピーは保持。共通整理の詳細は本体側cleanup.json。実利用先deploy、commit、push、Releaseは行っていない。
+
 ## 2026-10-30: フォント項目内操作0.5.3のコミット前照合
 
 - 利用者の確認後、mainの対象6ファイルと実装時22入力、本体845入力、両配布物695ファイル/ZIPをSHA256で照合。固定AppDock0.105.2とのGUI14群・MCP公開15項目の検証、C#/SDK依存29入力が同じ標準回帰21件を再利用した。本体の宣言読み込み/設定検索に依存する未実施65ファイル731件も成功。製品変更・版更新・再発行なし。
