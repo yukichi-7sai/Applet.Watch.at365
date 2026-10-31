@@ -82,18 +82,30 @@ internal partial class ClockWindow : Window
             try { RefreshBounds(); WriteTestSnapshot(); } catch (Exception e) { Console.Error.WriteLine(e); }
         }, DispatcherPriority.Loaded);
     }
-    public void Apply(ClockOptions next)
+    public void Apply(ClockOptions next, Action<string>? startupStage = null)
     {
         options = next.Normalize();
+        startupStage?.Invoke("fonts");
         FontSelection = ClockFonts.Select(options.FontFamily, InstalledFonts());
         foreach (var block in new[] { Hours, Seconds, Date }) block.FontFamily = new FontFamily(FontSelection.DisplayFamily);
+        startupStage?.Invoke("handle");
         new WindowInteropHelper(this).EnsureHandle();
+        startupStage?.Invoke("text");
         Opacity = options.Opacity;
         UpdateTime(DateTime.Now);
+        startupStage?.Invoke("layout");
         RefreshBounds();
-        if (DisplayVisible) { Show(); RefreshBounds(); timer.Start(); }
-        else { timer.Stop(); Hide(); }
+        if (DisplayVisible) {
+            startupStage?.Invoke("show");
+            Show();
+            startupStage?.Invoke("visible-layout");
+            RefreshBounds(); timer.Start();
+        } else {
+            startupStage?.Invoke("hide");
+            timer.Stop(); Hide();
+        }
         WriteTestSnapshot();
+        startupStage?.Invoke("applied");
     }
     private void UpdateTime(DateTime now)
     {

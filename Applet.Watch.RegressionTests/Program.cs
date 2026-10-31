@@ -82,7 +82,44 @@ Check("date formatting crosses day, year and leap-day boundaries", () => {
     Equal("2027/01/01", ClockFormatting.DateText(new DateTime(2026, 12, 31, 23, 59, 59).AddSeconds(1), "yyyy/MM/dd"));
     Equal("2028/02/29", ClockFormatting.DateText(new DateTime(2028, 2, 28).AddDays(1), "yyyy/MM/dd"));
 });
+var diagnosticMessages = new List<string>();
+await using (var diagnostics = new StartupDiagnostics(new TestLog((message, _) => {
+    diagnosticMessages.Add(message); return Task.CompletedTask;
+}), System.Diagnostics.Stopwatch.GetTimestamp())) {
+    diagnostics.Mark("activate.received");
+    diagnostics.Mark("clock.fonts");
+    diagnostics.Mark("activate.ready");
+}
+Check("startup diagnostics preserve stage order and invariant elapsed times", () => {
+    Equal(3, diagnosticMessages.Count);
+    if (!diagnosticMessages[1].Contains("stage=clock.fonts") || !diagnosticMessages[1].Contains("previousStage=activate.received")) throw new Exception("Missing stage transition");
+    foreach (var message in diagnosticMessages)
+        if (!System.Text.RegularExpressions.Regex.IsMatch(message, @"elapsedMs=\d+\.\d previousStage=\S+ previousMs=\d+\.\d managedMainMs=\d+\.\d utc=")) throw new Exception(message);
+});
+var failedLogCalls = 0;
+await using (var diagnostics = new StartupDiagnostics(new TestLog((_, _) => {
+    failedLogCalls++; throw new IOException("Fixture logging failure");
+}), System.Diagnostics.Stopwatch.GetTimestamp())) {
+    diagnostics.Mark("activate.received"); diagnostics.Mark("activate.ready");
+}
+Check("failed logging does not fail startup or retry", () => Equal(1, failedLogCalls));
+var logEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+var never = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+var stalledDiagnostics = new StartupDiagnostics(new TestLog((_, _) => {
+    logEntered.TrySetResult(); return never.Task;
+}), System.Diagnostics.Stopwatch.GetTimestamp());
+stalledDiagnostics.Mark("activate.received");
+await logEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+stalledDiagnostics.Mark("activate.ready");
+await stalledDiagnostics.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(2));
+Check("unresponsive logging has a bounded drain even if it ignores cancellation", () => Equal(false, never.Task.IsCompleted));
 Console.WriteLine($"{passed}/{passed} passed");
+
+sealed class TestLog(Func<string, CancellationToken, Task> write) : AppDock.SDK.ILogService
+{
+    public Task InfoAsync(string message, CancellationToken cancellationToken = default) => write(message, cancellationToken);
+    public Task ErrorAsync(string message, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+}
 
 sealed class TestSettings(Dictionary<string, object> values) : AppDock.SDK.ISettingsService
 {

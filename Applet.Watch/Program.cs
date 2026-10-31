@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using AppDock.Runtime;
@@ -9,13 +10,14 @@ internal static class Program
     [STAThread]
     public static int Main()
     {
+        var processStartedAt = Stopwatch.GetTimestamp();
         Console.InputEncoding = Encoding.UTF8;
         Console.OutputEncoding = new UTF8Encoding(false);
         var protocol = Console.Out;
         Console.SetOut(Console.Error);
         if (!Console.IsInputRedirected) return 2; // AppDock owns this process and its connection.
         var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-        var applet = new ClockApplet(application.Dispatcher);
+        var applet = new ClockApplet(application.Dispatcher, processStartedAt);
         application.DispatcherUnhandledException += (_, e) => {
             Console.Error.WriteLine(e.Exception);
             e.Handled = true;

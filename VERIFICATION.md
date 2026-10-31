@@ -1,5 +1,23 @@
 # 検証記録
 
+## 2026-10-31: 起動診断0.5.5のコミット・プッシュ前照合
+
+- 診断ログ実装の12ファイルを対象に確認。mainとGitHub origin/mainはfetch後に一致し、別作業の変更なし。製品の追加修正は不要で、0.5.5と発行物を維持する。
+- 実装時のソース/試験/ビルド定義/共有SDK・Runtime/固定ツール定義/ホスト試験入力302ファイルのSHA256が一致。Release build、標準回帰24件、発行済み実プロセス起動6条件、固定AppDock GUI15項目、ZIP/payload照合を成功ログと結果JSONから再利用した。現在のWatch EXE/ZIP/feed/manifestと固定ホストEXEのハッシュも一致。未実行の必要回帰や影響を受けた成功結果はなく、追加試験・版更新・再発行は不要。
+- 証跡は`.artifacts/commit-validation-startup-diagnostics-20261031/`の`reuse.json`、`stage.json`、`commit.json`、`push.json`。今回の検証記録追記だけを製品入力の照合から除外し、stage/commit treeは一致を確認する。実Windows起動・ARSO・ロック中の再現は引き続き未確認。実利用先deploy・GitHub Releaseは対象外。
+
+## 2026-10-31: 起動段階の診断ログ（0.5.5）
+
+- Watchのmain・追跡先・clean状態を確認し、`pull --ff-only`で最新確認後に実装。起動要求受信、UI受付、時計/日付画面作成、フォント、Window/文字/配置/表示、モニター候補送信、イベント購読、状態パネル送信、完了/失敗を、共通Log APIへinfoで記録する。各行に起動単位のID、段階、単調増加時計の経過時間と直前段階の時間、Main開始からの時間、計測UTCを含む。
+- 診断キューは64行で、固定の起動経路はこの範囲内。UIはログ応答を待たず、終了時の排出待ちは最大250ms。ログ拒否・無応答は再送せず、元の起動結果を保持する。設定値・フォント名・ユーザー名・パス・生の例外は新規ログへ出さない。設定変更や毎秒の描画では診断ログを出さない。
+- 発行前に実装差分と影響先をレビューし、阻害指摘なし。時計/日付の独立表示、フォント代替と保存、既存ホスト通信、15秒期限と起動待ち設定を維持。設定・保存ファイル・公開API・依存の変更なしのためパッチ更新。AppDock本体・SDK/Runtimeの製品ソースは変更なし。
+- Release buildは警告0/エラー0。標準回帰24/24成功（既存21＋診断ログの順序/時刻、送信失敗、無応答の排出期限3件）。開発EXEと発行済みEXEでそれぞれ起動試験6条件が成功：非表示、両表示、モニター候補送信の応答待ち中に段階ログ到達、起動失敗時の直前段階、ログ送信拒否、ログ無応答。設定反映でログが増えないことと、設定値をログに含めないことも確認。
+- Watch 0.5.5を既定の40.ARTIFACTへpublish成功。固定AppDock 0.109.1との隔離GUI15項目成功。Watchのsource/infoで共通ログへ最初から完了まで届くこと、既存の表示/時計更新/クリック透過/非活性、設定確定・Escape取消・再起動保持、フォント選択の確定/取消、MCP公開15項目と非公開モニター2項目、停止/終了を確認。新しいログの確認以外は既存UI試験を利用した。
+- manifest/EXE/feedの0.5.5とZIP全2ファイルのサイズ/SHA256が一致。EXE SHA256: `42d9c57c57249e3b0e740d793ea46d316132677faccb7ffd762e748f8effa1b5`、ZIP SHA256: `bed6027501e15fd694979fcb9ee7d4cd71eaae30eb2512f68019bf2743150290`。既存の配置スクリプト/ローカル配置先ファイルはハッシュ不変。
+- 証跡は`.artifacts/startup-diagnostics-20261031/`の`review.json`、`build.log`、`regression.log`、`startup-development.log`、`publish.log`、`startup-published.log`、`ui-published.log`、`package-result.json`、`inputs.json`、`validation.json`。段階ログは開発`.artifacts/startup-protocol-1793424752628/`、発行済み`.artifacts/startup-protocol-1793424888090/`の各条件フォルダーへ保存。固定GUIは`.artifacts/independent-display-ui-1793424893426/`の`result.json`と`startup-log.json`。
+- 整理は終了/成功/パス/プロセス/再解析ポイントを確認し、旧成功GUI `independent-display-ui-1793337532502`の本体管理対象692ファイルだけ削除。記録109ファイルのハッシュ一致と最新成功コピーの保持を確認。失敗試行・過去の参照中検証記録・起動試験2回を保持。`cleanup.json`参照。
+- 実Windows起動・ARSO・ロック画面でのタイムアウト再現、物理複数画面/混在DPIは未確認。ロック状態自体は記録しない。Main以前のEXE展開/.NET起動と、最初の診断が未到達の場合はこのログだけで原因を特定できない。今回の変更は原因調査用で、タイムアウトの解消を確認したものではない。本体全回帰は本体無変更のため未実施。実利用先deploy、commit、push、GitHub Releaseは行わない。
+
 ## 2026-10-30: フォントボタン0.5.4のコミット・プッシュ照合
 
 - 利用者の動作確認後、本体とWatchのmainをコミット・GitHubへプッシュする範囲で確認した。Watchのorigin/mainとHEADは一致し、今回の6ファイルだけを対象にする。

@@ -8,6 +8,7 @@
     <Compile Include="../Applet.Watch/ClockFonts.cs" Link="ClockFonts.cs" />
     <Compile Include="../Applet.Watch/ClockLayout.cs" Link="ClockLayout.cs" />
     <Compile Include="../Applet.Watch/ClockFormatting.cs" Link="ClockFormatting.cs" />
+    <Compile Include="../Applet.Watch/StartupDiagnostics.cs" Link="StartupDiagnostics.cs" />
     <ProjectReference Include="../../AppDock.at365/dotnet/AppDock.SDK/AppDock.SDK.csproj" />
   </ItemGroup>
 </Project>

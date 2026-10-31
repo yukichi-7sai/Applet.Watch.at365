@@ -67,3 +67,30 @@ GUI試験にscripts/settings-mcp-check.cjsによる隔離MCP確認を含みま�
 フォントはWindowsのFonts.SystemFontFamiliesから確認し、保存したfontFamilyを名前で解決します。既定値は空文字で、空欄は正常なSegoe UIの既定表示として扱います。見つからない場合も通知せずSegoe UIで描画し、保存値は置換しません。選択は共通の文字列設定とWindowsのFontDialogから行い、128件の動的select候補上限に依存しません。通知capabilityと通知種類は宣言しません。
 
 Resources/Hatten.ttfは.gitignore対象として手元に保持し、ビルドのNone/Resource/Contentへ含めません。新規checkoutやTTF不在でもビルド・発行できます。ソース・EXE・ZIPから再配布せず、過去Git履歴の扱いは検証記録を参照してください。
+
+## 起動タイムアウトの診断
+
+起動ごとに共通Log APIへ`[Watch起動診断]`をinfoで記録します。AppDockのログをWatchで絞り込み、失敗した起動の`attempt`が同じ行を確認してください。新しい設定や独自の保存ファイルは追加しません。設定変更や毎秒の描画では出力しません。
+
+`stage`はこれから実行する処理、`elapsedMs`はActivateAsync開始からの経過時間、`previousStage`と`previousMs`は直前の段階とそこに費やした時間です。`managedMainMs`は管理コードのMain開始からの経過時間で、EXEの展開や.NETランタイムの起動前処理は含みません。`utc`は計測時刻で、送信待ちがあるとホストの受信時刻とは異なります。計測は単調増加時計を使います。
+
+| stage | 処理 |
+| --- | --- |
+| `activate.received` | 起動要求を受信して初期化を開始 |
+| `ui.dispatch` / `settings.read` | UIスレッドの受付待ち / 保存済み設定の読み取り |
+| `clock.create` / `date.create` | 時計 / 日付のWPF画面作成 |
+| `clock.fonts` / `date.fonts` | インストール済みフォントの確認と選択 |
+| `*.handle` / `*.text` | ネイティブWindowの準備 / 時刻テキストの設定 |
+| `*.layout` | モニター選択・文字計測・画面配置 |
+| `*.show` / `*.hide` / `*.visible-layout` / `*.applied` | 表示 / 非表示 / 表示後の再配置 / その画面の適用完了 |
+| `monitors.dispatch` / `monitors.enumerate` | UIスレッドの受付待ち / モニター一覧の取得 |
+| `monitor.options` / `dateMonitor.options` | モニター候補をホストへ送信し、応答待ち |
+| `events.subscribe` | 設定変更・画面構成変更の購読 |
+| `state.dispatch` / `state.build` / `state.publish` | UIスレッドの受付待ち / 状態パネルの作成 / ホストへの送信・応答待ち |
+| `activate.ready` / `activate.failed` | 初期化完了（起動応答送信前） / 例外発生（previousStageを確認） |
+
+最後の段階の後にホストのタイムアウトがあれば、その段階を調査対象にします。ただしログ自体の通信遅延・欠落もあり、最後の行だけで停止場所を断定しません。最初の`activate.received`もない場合は、ActivateAsyncに到達する前の起動、またはログ通信の問題を含み、この計測だけでは区別できません。Windowsのロック状態はこのログから断定できません。
+
+ログはUIスレッドから応答待ちをせず、最大64行の専用キューで順に送ります（現行の固定経路は64行未満）。ログ送信失敗は起動の失敗にせず、再送しません。起動処理の終了時は最大250msだけ排出を待ち、無応答なら送信待ちを取り消します。フォント名・設定値・ユーザー名・パスなどは出力しません。ホストの15秒期限、自動再試行の有無、起動遅延やWindows設定は変更しません。
+
+`scripts/test-startup.cjs [Watch EXE]`で、非表示/表示起動、ホスト応答待ち中の段階到達、起動失敗の直前段階、ログ送信の拒否/無応答、通常設定変更でログが増えないことを隔離検証します。共通ログへの実際の到達は既存の固定EXE UI試験でも確認します。実サインイン・ロック状態での再現は別の実機確認です。

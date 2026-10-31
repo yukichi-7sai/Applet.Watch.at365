@@ -151,6 +151,14 @@ async function selectSettingsPage(pageId) {
   config.globalShortcutCommands = [];
   fs.writeFileSync(path.join(profile, "settings.json"), JSON.stringify(config));
   await launch();
+  const startupLogs = await page.evaluate(async (id) => (await window.dock.snapshot()).logs
+    .filter((entry) => entry.source === id && entry.message.startsWith("[Watch起動診断]")), id);
+  assert(startupLogs.length > 0);
+  assert(startupLogs.every((entry) => entry.level === "info"));
+  assert.match(startupLogs[0].message, /stage=activate.received /);
+  assert.match(startupLogs.at(-1).message, /stage=activate.ready /);
+  fs.writeFileSync(path.join(profile, "startup-log.json"), JSON.stringify(startupLogs, null, 2));
+  checks.push("startup stages reach the shared host log with Watch source and info level");
   await until(() => !state().visible && !dateState().visible, "both displays default to off");
   assert.equal(state().timerRunning, false);
   assert.equal(dateState().timerRunning, false);
