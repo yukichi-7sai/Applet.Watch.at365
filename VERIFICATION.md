@@ -1,5 +1,15 @@
 # 検証記録
 
+## 2026-10-31: data内設定の互換試験のコミット前照合
+
+- 今回は`scripts/test-fonts-ui.cjs`と本検証記録だけを対象にレビューし、阻害指摘なし。実装時の試験入力、成功ログ、本体0.111.0の固定コピー693ファイルをSHA256で照合し、GUI15項目の成功を再利用した。Watch製品入力/版は不変で、0.5.6を維持し再発行は不要。
+- 本体の標準回帰1398件も再実行で成功。共通証跡は本体`.artifacts/commit-validation-data-settings-20261031/`のinput-audit・payload-audit・regression・reuse・stage・commit。検証記録の追記を除いて入力一致を確認し、stageとcommitのtreeを照合する。実Windowsログオン/ARSO、複数画面/DPIは未確認を維持し、push・Release・実利用先deployは行わない。
+
+## 2026-10-31: AppDock 0.111.0のdata内設定との互換性
+
+- 本体の設定配置変更に合わせ、`scripts/test-fonts-ui.cjs`の隔離設定作成/読取を本体の`test-settings.cjs`（data/settings.json）へ揃えた。Watch製品コード/版/発行物は変更せず0.5.6を維持した。
+- 発行済みAppDock 0.111.0とWatch 0.5.6でGUI15項目成功。時計・日付、設定確定/取消、フォント、表示/停止、再起動保持、MCP公開設定、Debug起動診断を確認。証跡は`.artifacts/independent-display-ui-1793434850230/`と本体`.artifacts/data-settings-20261031/watch-fixed.log`、入力/配布コピー照合は本体のvalidation/fixed-copies。実Windowsログオン/ARSO・複数画面/DPIは未確認。未コミット・未push。
+
 ## 2026-10-31: Debug診断0.5.6のコミット前照合
 
 - 受入済みの9ファイルを確認。実装時の両repo入力・成功ログと、Watch/本体の発行済みEXE/ZIP/feed/manifestのhash一致を確認し、Watch Release build・24回帰・開発/発行起動各6条件・固定GUI15項目を再利用した。Watch側の追加修正はこの検証記録だけで、0.5.6と発行物を維持する。

@@ -149,7 +149,7 @@ async function selectSettingsPage(pageId) {
   config.gestures.bindings = [];
   config.shortcuts = {};
   config.globalShortcutCommands = [];
-  fs.writeFileSync(path.join(profile, "settings.json"), JSON.stringify(config));
+  fs.writeFileSync(require(path.join(host, "scripts/test-settings.cjs")).file(profile), JSON.stringify(config));
   await launch();
   const startupLogs = await page.evaluate(async (id) => (await window.dock.snapshot()).logs
     .filter((entry) => entry.source === id && entry.message.startsWith("[Watch起動診断]")), id);
@@ -229,7 +229,7 @@ async function selectSettingsPage(pageId) {
   );
   await until(
     () =>
-      read(path.join(profile, "settings.json")).extensions[id].settings
+      read(require(path.join(host, "scripts/test-settings.cjs")).file(profile)).extensions[id].settings
         .fontFamily === "Segoe UI",
     "font saved",
   );
@@ -243,7 +243,7 @@ async function selectSettingsPage(pageId) {
   );
   await text("フォント", "");
   await until(() => state().requestedFont === "" && state().font === "Segoe UI", "clearing font uses fallback");
-  await until(() => !read(path.join(profile, "settings.json")).extensions[id].settings.fontFamily, "empty default persisted or omitted");
+  await until(() => !read(require(path.join(host, "scripts/test-settings.cjs")).file(profile)).extensions[id].settings.fontFamily, "empty default persisted or omitted");
   assert.equal(await page.getByLabel("フォント", { exact: true }).inputValue(), "");
   checks.push("empty default / clear to Segoe UI / no information button");
   await text("フォント", "Missing Font Fixture");
@@ -252,7 +252,7 @@ async function selectSettingsPage(pageId) {
     "missing font falls back without changing saved selection",
   );
   await until(
-    () => read(path.join(profile, "settings.json")).extensions[id].settings.fontFamily === "Missing Font Fixture",
+    () => read(require(path.join(host, "scripts/test-settings.cjs")).file(profile)).extensions[id].settings.fontFamily === "Missing Font Fixture",
     "missing font name remains saved",
   );
   const missingFontPid = state().processId;
