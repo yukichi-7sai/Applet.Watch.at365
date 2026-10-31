@@ -56,7 +56,7 @@ GUI試験にscripts/settings-mcp-check.cjsによる隔離MCP確認を含みま�
 
 ## 設定画面の構成
 
-`extension.json`の`settingSections`で用途別のカードを宣言します。描画・余白・入力・検索・保存は[本体の共通テンプレート](../AppDock.at365/docs/extensions.md#共通の設定ページ)へ委譲し、Applet固有の設定フォームやCSSを複製しません。フォント選択操作の`settingKey: fontFamily`で入力とボタンを同じFieldへ配置し、表示切り替えの説明には`[command:...]`を使います。設定キー・既定値・実行処理は変更しません。配置は`placement: below`、見た目は`appearance: filled`を宣言し、常に入力欄の下へ標準の塗りつぶしボタンを置きます。最低本体版は0.105.8です。
+`extension.json`の`settingSections`で用途別のカードを宣言します。描画・余白・入力・検索・保存は[本体の共通テンプレート](../AppDock.at365/docs/extensions.md#共通の設定ページ)へ委譲し、Applet固有の設定フォームやCSSを複製しません。フォント選択操作の`settingKey: fontFamily`で入力とボタンを同じFieldへ配置し、表示切り替えの説明には`[command:...]`を使います。設定キー・既定値・実行処理は変更しません。配置は`placement: below`、見た目は`appearance: filled`を宣言し、常に入力欄の下へ標準の塗りつぶしボタンを置きます。最低本体版はdebugログ対応に合わせて0.109.2です。
 
 ## 共通の運用
 
@@ -70,7 +70,7 @@ Resources/Hatten.ttfは.gitignore対象として手元に保持し、ビルド�
 
 ## 起動タイムアウトの診断
 
-起動ごとに共通Log APIへ`[Watch起動診断]`をinfoで記録します。AppDockのログをWatchで絞り込み、失敗した起動の`attempt`が同じ行を確認してください。新しい設定や独自の保存ファイルは追加しません。設定変更や毎秒の描画では出力しません。
+起動ごとに共通Log APIへ`[Watch起動診断]`をdebugで記録します。AppDockのログで提供元をWatch、レベルをDebugにして、失敗した起動の`attempt`が同じ行を確認してください。通常のInfo以上の表示では隠れますが、ファイルへの記録は継続します。分類と保存は[本体のログ仕様](../AppDock.at365/docs/logging.md)を参照してください。debug対応の最低本体版は0.109.2です。新しい設定や独自の保存ファイルは追加しません。設定変更や毎秒の描画では出力しません。
 
 `stage`はこれから実行する処理、`elapsedMs`はActivateAsync開始からの経過時間、`previousStage`と`previousMs`は直前の段階とそこに費やした時間です。`managedMainMs`は管理コードのMain開始からの経過時間で、EXEの展開や.NETランタイムの起動前処理は含みません。`utc`は計測時刻で、送信待ちがあるとホストの受信時刻とは異なります。計測は単調増加時計を使います。
 

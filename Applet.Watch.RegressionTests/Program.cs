@@ -117,7 +117,8 @@ Console.WriteLine($"{passed}/{passed} passed");
 
 sealed class TestLog(Func<string, CancellationToken, Task> write) : AppDock.SDK.ILogService
 {
-    public Task InfoAsync(string message, CancellationToken cancellationToken = default) => write(message, cancellationToken);
+    public Task DebugAsync(string message, CancellationToken cancellationToken = default) => write(message, cancellationToken);
+    public Task InfoAsync(string message, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     public Task ErrorAsync(string message, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 }
 

@@ -10,7 +10,7 @@
 
 ## 動作環境
 
-Windows x64とAppDock.at365 **v0.105.8以降**が必要です。
+Windows x64とAppDock.at365 **v0.109.2以降**が必要です。
 
 ## 導入・更新
 

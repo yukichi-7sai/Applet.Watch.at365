@@ -29,7 +29,7 @@ internal sealed class StartupDiagnostics : IAsyncDisposable
         pump = Task.Run(async () => {
             try {
                 await foreach (var message in queue.Reader.ReadAllAsync(delivery.Token))
-                    await log.InfoAsync(message, delivery.Token).WaitAsync(delivery.Token);
+                    await log.DebugAsync(message, delivery.Token).WaitAsync(delivery.Token);
             } catch (Exception) {
                 // Logging failures neither fail activation nor start retries/fallback logging.
             }

@@ -37,7 +37,7 @@ async function run(mode) {
   child.stderr.on("data", (data) => { stderr += data; });
   const peer = new JsonLinePeer(child.stdout, child.stdin, async (method, input) => {
     if (method === "host.log") {
-      assert.equal(input.level, "info");
+      assert.equal(input.level, "debug");
       logs.push(input.message);
       if (mode === "log-rejected") throw Error("Fixture log rejection");
       if (mode === "log-unanswered") await gate;

@@ -1,5 +1,20 @@
 # 検証記録
 
+## 2026-10-31: Debug診断0.5.6のコミット前照合
+
+- 受入済みの9ファイルを確認。実装時の両repo入力・成功ログと、Watch/本体の発行済みEXE/ZIP/feed/manifestのhash一致を確認し、Watch Release build・24回帰・開発/発行起動各6条件・固定GUI15項目を再利用した。Watch側の追加修正はこの検証記録だけで、0.5.6と発行物を維持する。
+- 共通ログを変更したAppDock側は既存の標準ログ試験fixtureだけを補い、成功記録の再利用134件と補完1257件で標準1391件の成功を確認。Watchへの製品入力は不変。共通証跡は本体`.artifacts/commit-validation-log-categories-20261031/`、本repoにもreuse/stage/commitを記録する。stageとcommitのtreeを照合する。Windows起動/ARSO/ロック時timeout原因と複数画面/DPIは未確認を維持し、push/Release/実利用deployは行わない。
+
+## 2026-10-31: 起動診断をDebugへ移行（0.5.6）
+
+- main/追跡先/cleanを確認し、`pull --ff-only`成功後に実装。起動診断の共通ログ呼出しをInfoAsyncからDebugAsyncへ変更。段階・時刻・固定キュー・排出期限・失敗時の扱い、時計/日付/フォント・保存・ホストの起動期限は維持した。対応するAppDock 0.109.2、SDK/Runtime 0.27.1を使い、manifest/操作文書の最低本体版を0.109.2へ揃えた。
+- AppDock側のdebug境界、監査の独立した種類、画面の通常/監査/レベル切替も同時に実装。Watchの診断は通常のdebugで、提供元Watch＋Debugで確認する。画面で隠れてもファイルへ記録される。共通仕様は本体`docs/logging.md`を参照する。
+- 発行前にログ呼出し・SDK互換性・最低本体版・既存挙動・試験をレビューし、指摘なし。設定/保存ファイル追加や破壊的API変更なしのため0.5.6へパッチ更新。Release build成功（警告0/エラー0）、標準回帰24/24成功。テストLogはInfoAsyncを拒否し、debug経路の使用を確認する。
+- 開発EXEと発行EXEでそれぞれ起動6条件成功：非表示、表示、ホストのモニター応答待ち中、起動失敗、ログ拒否、ログ無応答。debugで段階順序が保たれ、ログ失敗で起動を失敗させず、通常の設定更新で診断が増えない。固定AppDock 0.109.2とのGUI15項目も成功し、共通ログのsource=at365.watch/level=debug/category=normal、表示・クリック透過・時計更新・設定確定/取消・フォント選択・再起動保持・MCP公開設定・停止/終了を確認。
+- `publish.bat`成功。EXE/manifest/feed版0.5.6、minimumHostVersion 0.109.2、ZIP全2ファイルのサイズ/SHA256一致。EXE SHA256 `d547a3a738d0e97f084e7f95976344e8535e15d6cd2cef1ea729f7e6c3dd29c7`、ZIP SHA256 `b877a6d9773422a7a6370a58e6d0f523504cb93e0d755f3d5f88ea8d35cd6073`。配置スクリプト/ローカル配置先3ファイルは保持した。
+- 証跡は`.artifacts/debug-logging-20261031/`のreview/build/regression/startup-development/publish/startup-published/ui-published/validation、開発`startup-protocol-1793426331858`、発行`startup-protocol-1793426495989`、固定GUI `independent-display-ui-1793426501276`のresult/startup-log/画像。入力hash/ZIP照合/整理の共通記録は本体`.artifacts/log-categories-20261031/`。旧成功GUI `independent-display-ui-1793424893426`の本体/Watch実行用693ファイルを整理し、110記録のhashを保持。最新成功と失敗のコピーは保持。
+- 実Windowsサインイン/ARSO/ロック中のtimeout再現と原因特定、複数画面/混在DPIは引き続き未確認。今回の変更をtimeout修復として扱わない。実利用先deploy、commit、push、GitHub Releaseは今回行っていない。
+
 ## 2026-10-31: 起動診断0.5.5のコミット・プッシュ前照合
 
 - 診断ログ実装の12ファイルを対象に確認。mainとGitHub origin/mainはfetch後に一致し、別作業の変更なし。製品の追加修正は不要で、0.5.5と発行物を維持する。
