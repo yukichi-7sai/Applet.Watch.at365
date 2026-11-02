@@ -9,7 +9,7 @@ const {
 } = require("../../AppDock.at365/scripts/publish-paths.cjs");
 const root = path.resolve(__dirname, ".."),
   host = path.resolve(root, "../AppDock.at365");
-const { copyHost } = require(path.join(host, "scripts/copy-host.cjs"));
+const { prepareTestHost } = require(path.join(host, "scripts/copy-host.cjs"));
 const { overlayPage } = require(path.join(host, "scripts/shell-overlay-helper.cjs"));
 const { chromium, _electron: electron } = require(
   path.join(host, "node_modules/playwright"),
@@ -47,8 +47,7 @@ async function launch() {
   delete env.ELECTRON_RUN_AS_NODE;
   let context;
   if (process.argv[2]) {
-    const exe = path.join(profile, "AppDock.at365.exe");
-    copyHost(path.resolve(process.argv[2]), exe);
+    const exe = prepareTestHost(path.resolve(process.argv[2]), profile, path.join(root, '.artifacts'));
     hostHash = hash(exe);
     assert.equal(hostHash, hash(path.resolve(process.argv[2])));
     const server = net.createServer();
@@ -144,6 +143,8 @@ async function selectSettingsPage(pageId) {
     settings: { fontSize: 160 },
   };
   config.keybindings = [];
+  config.keybindingOptions.enabled = false;
+  config.touchpadGestures.enabled = false;
   config.keybindingDefaultsInitialized = [id];
   config.gestureDefaultsInitialized = [id];
   config.gestures.bindings = [];
