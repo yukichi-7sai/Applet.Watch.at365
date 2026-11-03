@@ -13,7 +13,7 @@ foreach ($taskSymbols in @('AppDock.Runtime.pdb', 'AppDock.SDK.pdb')) {
 }
 Write-Output "Applet output: $taskPublishDirectory"
 
-# Match the existing deploy payload; remove obsolete build outputs before creating the ZIP.
+# Remove obsolete build outputs before creating the ZIP.
 foreach ($taskOldName in @('AppDock.SDK.dll', 'AppDock.SDK.pdb', 'AppDock.Runtime.dll', 'Applet.Watch.at365.dll', 'Applet.Watch.at365.deps.json', 'Applet.Watch.at365.runtimeconfig.json', 'Applet.Watch.at365.pdb', 'Resources\Hatten.ttf')) {
     $taskOldFile = Join-Path $taskPublishDirectory $taskOldName
     if (Test-Path -LiteralPath $taskOldFile -PathType Leaf) { Remove-Item -LiteralPath $taskOldFile }
@@ -21,5 +21,3 @@ foreach ($taskOldName in @('AppDock.SDK.dll', 'AppDock.SDK.pdb', 'AppDock.Runtim
 
 $taskUpdateHostRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\AppDock.at365'))
 & (Join-Path $taskUpdateHostRoot 'scripts\pack-applet-update.ps1') -SourceDirectory $taskPublishDirectory -OutputDirectory $taskArtifact
-
-Install-PublishedDeployment $taskAppletRoot $taskArtifact

@@ -2,6 +2,5 @@
 **/obj/
 publish/
 .artifacts/
-deploy.local.txt
 *.user
 /Applet.Watch/Resources/Hatten.ttf

@@ -2,9 +2,9 @@
 
 機能の説明・操作方法・設定・既定値・動作環境は[機能・操作・設定](docs/usage.md)を参照してください。共通の文書構成は[ドキュメント方針](../AppDock.at365/docs/documentation.md)に従います。
 
-## 発行・配置ファイルの保存先
+## 発行先
 
-標準発行先は `A:\40.ARTIFACT\Applet.Watch.at365` です。`publish.bat`はソースrepo、`deploy.bat`は発行先から実行します。配置用ファイル・設定の保持とテンプレートの更新は[共通発行手順](../AppDock.at365/docs/publishing.md)を参照してください。
+標準発行先は `A:\40.ARTIFACT\Applet.Watch.at365` です。`publish.bat`はソースrepoから実行します。詳細は[共通発行手順](../AppDock.at365/docs/publishing.md)を参照してください。
 
 実装時のテスト選択、コミット前の必要回帰、リリース前のコミット/プッシュ確認と検証証跡の再利用は、[本体・Applet共通手順](../AppDock.at365/docs/development-workflow.md)に従います。この文書の試験コマンドは、その段階に応じて実行します。
 
@@ -20,10 +20,9 @@ Windows x64、.NET 10 SDK、隣接するAppDock.at365のソースが必要です
 dotnet build Applet.Watch.at365.slnx -c Release
 dotnet run --project Applet.Watch.RegressionTests -c Release
 .\publish.bat
-A:\40.ARTIFACT\Applet.Watch.at365\deploy.bat "C:\Tools\AppDock.at365"
 ```
 
-`publish.bat`の第1引数には任意の発行先、`deploy.bat`の第1引数にはAppDock.at365.exeがあるフォルダーを指定できます。配置先は引数、`deploy.local.txt`の先頭行の順です。未指定ならエラーになります。実利用先への配置時はAppDockを完全終了してください。
+`publish.bat`の第1引数には任意の発行先を指定できます。実利用先への配置時はAppDockを完全終了し、発行物を`extensions/Applet.Watch.at365`へコピーしてください。
 
 発行物は`A:/40.ARTIFACT/Applet.Watch.at365/Applet.Watch.at365/`に生成します。配置に必要なファイルは次の2つです。
 
