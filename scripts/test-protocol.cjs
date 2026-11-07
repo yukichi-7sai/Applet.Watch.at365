@@ -1,7 +1,8 @@
 const path = require("node:path"),
   fs = require("node:fs"),
   assert = require("node:assert/strict");
-const { spawn, execFileSync } = require("node:child_process");
+const { spawn, execFile } = require("node:child_process");
+const runFile = require("node:util").promisify(execFile);
 const {
   getPublishDirectory,
 } = require("../../AppDock.at365/scripts/publish-paths.cjs");
@@ -120,7 +121,7 @@ const peer = new JsonLinePeer(
     const command = peer.request("command.execute", {
       id: "at365.watch.choose-font",
     });
-    execFileSync(
+    await runFile(
       "pwsh.exe",
       [
         "-NoProfile",
@@ -131,7 +132,7 @@ const peer = new JsonLinePeer(
         "-Action",
         action,
       ],
-      { windowsHide: true, stdio: "inherit" },
+      { windowsHide: true },
     );
     await command;
     if (action === "cancel") assert.equal(setCalls(), before);
