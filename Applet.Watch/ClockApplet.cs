@@ -39,7 +39,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher, long processStartedAt) 
             diagnostics.Mark("events.subscribe");
             settingsSubscription = services.Settings.OnChanged(ApplyAsync);
             SystemEvents.DisplaySettingsChanged += DisplayChanged;
-            await PublishStateAsync(cancellationToken, diagnostics);
             diagnostics.Mark("activate.ready");
         } catch {
             diagnostics.Mark("activate.failed");
@@ -51,7 +50,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher, long processStartedAt) 
         if (context is null) return;
         var options = ClockOptions.Read(context.Settings);
         await dispatcher.InvokeAsync(() => { clock?.Apply(options); date?.Apply(options); });
-        await PublishStateAsync(token);
     }
     private async Task PublishMonitorsAsync(CancellationToken token, StartupDiagnostics? diagnostics = null)
     {
@@ -65,17 +63,6 @@ internal sealed class ClockApplet(Dispatcher dispatcher, long processStartedAt) 
         await context.Settings.SetOptionsAsync("monitor", options, token);
         diagnostics?.Mark("dateMonitor.options");
         await context.Settings.SetOptionsAsync("dateMonitor", options, token);
-    }
-    private async Task PublishStateAsync(CancellationToken token, StartupDiagnostics? diagnostics = null)
-    {
-        if (context is null || clock is null || date is null) return;
-        diagnostics?.Mark("state.dispatch");
-        var panel = await dispatcher.InvokeAsync(() => {
-            diagnostics?.Mark("state.build");
-            return clock.StatePanel(context.ExtensionId, date);
-        });
-        diagnostics?.Mark("state.publish");
-        await context.Ui.ShowPanelAsync(panel, token);
     }
     private async void DisplayChanged(object? sender, EventArgs e)
     {

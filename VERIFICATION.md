@@ -1,5 +1,12 @@
 # 検証記録
 
+## 2026-11-07 旧パネル送信の廃止（0.6.0）
+
+- 状態パネルの構築・送信とui capabilityを除去した。時計/日付のWPF表示、フォント選択、座標/表示設定、コマンド、共通ログと保存を保持した。プロトコル試験は実画面の診断snapshotで確認する。
+- Release build（警告・エラー0）、標準回帰24件、発行nativeの実フォントダイアログ取消/確定・設定反映・停止、本体固定EXEの独立した時計/日付・配置・フォント・保存/再起動・MCP設定反映に成功した。GUI試験の古いMCP設定と権限変更後のrevisionを現行契約へ合わせて再検証した。Pause/F13〜F24のOS送信・登録は行っていない。
+- 最低本体0.180.0・SDK/Runtime 0.34.0に合わせminor更新し、publish.batで発行。manifest/feed/ZIPと実行EXEのハッシュを照合した。実サインイン/ロック、DPI変更・モニター抜差し・長期常駐は未確認。
+- 証跡は`../AppDock.at365/.artifacts/legacy-api-retirement-20261107/`、stage/commit treeと再利用・整理は同repoの`.artifacts/commit-validation-legacy-api-retirement-20261107/`へ記録する。mainでローカルコミットし、push・Release・実利用先配置は行わない。
+
 ## 2026-11-07 RPC検証修正のコミット前照合
 
 - 非同期のダイアログ操作待機と検証記録の2ファイルが実装時の最終ハッシュと一致し、製品内容に後続変更がないことを確認した。Release build・独立回帰24件・実nativeプロトコルの成功を再利用し、追加の製品回帰・発行は行わない。

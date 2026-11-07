@@ -157,22 +157,6 @@ internal partial class ClockWindow : Window
         var alignment = Placement.Alignment.StartsWith("bottom", StringComparison.Ordinal) ? VerticalAlignment.Bottom : VerticalAlignment.Top;
         Hours.VerticalAlignment = Seconds.VerticalAlignment = Date.VerticalAlignment = alignment;
     }
-    public Panel StatePanel(string commandPrefix, ClockWindow dateWindow)
-    {
-        NativeWindow.GetWindowRect(handle, out var rect);
-        var selected = ClockLayout.SelectMonitor(Monitors(), options.Monitor);
-        var dateMonitor = ClockLayout.SelectMonitor(Monitors(), options.DateMonitor);
-        return new Panel("Watch", "時計と日付を個別に配置できます。表示はクリックを透過し、フォーカスを奪いません。", [
-            new("時計", NativeWindow.IsWindowVisible(handle) ? "表示中" : "非表示"),
-            new("日付", NativeWindow.IsWindowVisible(dateWindow.handle) ? "表示中" : "非表示"),
-            new("フォント", FontSelection.DisplayFamily + (FontSelection.IsUnavailable ? "（選択したフォントが未インストール）" : "")),
-            new("時計のモニター", selected.Label + (options.Monitor != "primary" && selected.Id != options.Monitor ? "（未接続のためメインへ退避）" : "")),
-            new("日付のモニター", dateMonitor.Label + (options.DateMonitor != "primary" && dateMonitor.Id != options.DateMonitor ? "（未接続のためメインへ退避）" : "")),
-            new("日付の表示例", ClockFormatting.DateText(DateTime.Now, options.DateFormat)),
-            new("時計の座標", $"{rect.Left}, {rect.Top} · {rect.Right - rect.Left}×{rect.Bottom - rect.Top}")
-        ], [new("時計を表示", commandPrefix + ".settings.visible.on"), new("時計を非表示", commandPrefix + ".settings.visible.off"), new("時計を切り替え", commandPrefix + ".settings.visible.toggle"),
-            new("日付を表示", commandPrefix + ".settings.showDate.on"), new("日付を非表示", commandPrefix + ".settings.showDate.off"), new("日付を切り替え", commandPrefix + ".settings.showDate.toggle")]);
-    }
     private void WriteTestSnapshot()
     {
         var directory = Environment.GetEnvironmentVariable("APPDOCK_WATCH_TEST_OUTPUT");

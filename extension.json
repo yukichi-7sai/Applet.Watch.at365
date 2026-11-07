@@ -5,16 +5,13 @@
   "displayName": "Watch",
   "icon": "clock",
   "tagline": "いつもの画面に、見やすい時計を。",
-  "version": "0.5.6",
-  "minimumHostVersion": "0.109.2",
+  "version": "0.6.0",
+  "minimumHostVersion": "0.180.0",
   "updateRepository": "yukichi-7sai/Applet.Watch.at365",
   "runtime": "native",
   "entry": "Applet.Watch.at365.exe",
   "description": "半透明の時計と日付をデスクトップに表示します。表示・文字サイズ・モニター・位置をそれぞれ設定できます。",
-  "capabilities": [
-    "ui",
-    "settings"
-  ],
+  "capabilities": ["settings"],
   "commands": [
     {
       "id": "at365.watch.choose-font",
@@ -37,11 +34,7 @@
     {
       "key": "visible",
       "automation": true,
-      "generateCommands": [
-        "on",
-        "off",
-        "toggle"
-      ],
+      "generateCommands": ["on", "off", "toggle"],
       "title": "時計を表示",
       "type": "boolean",
       "default": false,
@@ -151,11 +144,7 @@
     {
       "key": "showSeconds",
       "automation": true,
-      "generateCommands": [
-        "on",
-        "off",
-        "toggle"
-      ],
+      "generateCommands": ["on", "off", "toggle"],
       "title": "秒を表示",
       "type": "boolean",
       "default": true,
@@ -164,11 +153,7 @@
     {
       "key": "showDate",
       "automation": true,
-      "generateCommands": [
-        "on",
-        "off",
-        "toggle"
-      ],
+      "generateCommands": ["on", "off", "toggle"],
       "title": "日付を表示",
       "type": "boolean",
       "default": false,
@@ -304,39 +289,22 @@
     {
       "id": "appearance",
       "title": "共通の見た目",
-      "settings": [
-        "opacity",
-        "fontFamily"
-      ]
+      "settings": ["opacity", "fontFamily"]
     },
     {
       "id": "clock",
       "title": "時計の表示",
-      "settings": [
-        "visible",
-        "showSeconds",
-        "fontSize",
-        "secondsFontSize"
-      ]
+      "settings": ["visible", "showSeconds", "fontSize", "secondsFontSize"]
     },
     {
       "id": "position",
       "title": "時計の表示位置",
-      "settings": [
-        "monitor",
-        "alignment",
-        "horizontalMargin",
-        "verticalMargin"
-      ]
+      "settings": ["monitor", "alignment", "horizontalMargin", "verticalMargin"]
     },
     {
       "id": "date",
       "title": "日付の表示",
-      "settings": [
-        "showDate",
-        "dateFormat",
-        "dateFontSize"
-      ]
+      "settings": ["showDate", "dateFormat", "dateFontSize"]
     },
     {
       "id": "date-position",

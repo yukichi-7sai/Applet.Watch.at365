@@ -25,20 +25,23 @@ module.exports = async function checkSettings({
   await page.evaluate(() =>
     window.dock.automation({
       kind: "configure",
+      receiver: "codex",
       enabled: true,
-      allowWrite: true,
       port: 0,
     }),
   );
   await page.evaluate(() =>
     window.dock.automation({ kind: "setExecution", allowed: true }),
   );
+  await page.evaluate(() =>
+    window.dock.automation({ kind: "setWrite", allowed: true }),
+  );
   const registration = await page.evaluate(() =>
     window.dock.automation({ kind: "register" }),
   );
-  assert.equal(registration.state.registration, "registered");
+  assert.equal(registration.state.codex.registration, "registered");
   const headers = hostRequire("smol-toml").parse(fs.readFileSync(file, "utf8"))
-    .mcp_servers[registration.state.serverId].http_headers;
+    .mcp_servers[registration.state.codex.serverId].http_headers;
   const { Client } = hostRequire("@modelcontextprotocol/sdk/client/index.js");
   const { StreamableHTTPClientTransport } = hostRequire(
     "@modelcontextprotocol/sdk/client/streamableHttp.js",
@@ -49,9 +52,12 @@ module.exports = async function checkSettings({
   });
   try {
     await client.connect(
-      new StreamableHTTPClientTransport(new URL(registration.state.endpoint), {
-        requestInit: { headers },
-      }),
+      new StreamableHTTPClientTransport(
+        new URL(registration.state.codex.endpoint),
+        {
+          requestInit: { headers },
+        },
+      ),
     );
     const call = async (name, args = {}) => {
       const response = await client.callTool({ name, arguments: args });
@@ -97,15 +103,8 @@ module.exports = async function checkSettings({
       assert.equal(result.isError, true);
       assert.deepEqual(await get(), before, "invalid patch changed state");
     }
-    await page.evaluate(
-      (port) =>
-        window.dock.automation({
-          kind: "configure",
-          enabled: true,
-          port,
-          allowWrite: false,
-        }),
-      Number(new URL(registration.state.endpoint).port),
+    await page.evaluate(() =>
+      window.dock.automation({ kind: "setWrite", allowed: false }),
     );
     const denied = await client.callTool({
       name: "appdock_execute_command",
@@ -115,18 +114,17 @@ module.exports = async function checkSettings({
       },
     });
     assert.equal(denied.isError, true);
-    await page.evaluate(
-      (port) =>
-        window.dock.automation({
-          kind: "configure",
-          enabled: true,
-          port,
-          allowWrite: true,
-        }),
-      Number(new URL(registration.state.endpoint).port),
+    await page.evaluate(() =>
+      window.dock.automation({ kind: "setWrite", allowed: true }),
+    );
+    const writable = await get();
+    assert.deepEqual(
+      writable.values,
+      before.values,
+      "permission edits changed Applet settings",
     );
     assert.equal(
-      (await run({ changes, expectedRevision: before.revision })).completion,
+      (await run({ changes, expectedRevision: writable.revision })).completion,
       "settingsSaved",
     );
     const after = await get();
@@ -167,9 +165,9 @@ module.exports = async function checkSettings({
     await page.evaluate(() =>
       window.dock.automation({
         kind: "configure",
+        receiver: "codex",
         enabled: false,
         port: 0,
-        allowWrite: false,
       }),
     );
   }

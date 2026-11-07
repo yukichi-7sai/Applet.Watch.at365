@@ -11,17 +11,26 @@ const root = path.resolve(__dirname, ".."),
 const { JsonLinePeer } = require(path.join(host, "out/main/main/core/rpc.js"));
 const settings = {},
   calls = [];
-const exe = process.argv[2] ? path.resolve(process.argv[2]) : path.join(
-  getPublishDirectory(root),
-  "Applet.Watch.at365/Applet.Watch.at365.exe",
+const exe = process.argv[2]
+  ? path.resolve(process.argv[2])
+  : path.join(
+      getPublishDirectory(root),
+      "Applet.Watch.at365/Applet.Watch.at365.exe",
+    );
+const probe = path.join(
+  root,
+  ".artifacts",
+  `independent-protocol-${Date.now()}`,
 );
-const probe = path.join(root, ".artifacts", `independent-protocol-${Date.now()}`);
 fs.mkdirSync(probe, { recursive: true });
-const state = (name) => JSON.parse(fs.readFileSync(path.join(probe, `${name}-state.json`), "utf8"));
+const state = (name) =>
+  JSON.parse(fs.readFileSync(path.join(probe, `${name}-state.json`), "utf8"));
 async function until(check, label) {
   const deadline = Date.now() + 15000;
   while (Date.now() < deadline) {
-    try { if (check()) return; } catch {}
+    try {
+      if (check()) return;
+    } catch {}
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   throw Error(label);
@@ -31,8 +40,7 @@ const child = spawn(exe, [], {
   windowsHide: true,
   stdio: ["pipe", "pipe", "pipe"],
 });
-let diagnostics = "",
-  panel;
+let diagnostics = "";
 child.stderr.on("data", (data) => (diagnostics += data));
 const exited = new Promise((resolve, reject) => {
   child.on("error", reject);
@@ -43,7 +51,6 @@ const peer = new JsonLinePeer(
   child.stdin,
   async (method, input) => {
     calls.push({ method, input });
-    if (method === "host.ui.panel") panel = input;
     if (method === "host.notifications.publish")
       return { status: "accepted", notificationId: "font-notice" };
     if (method === "host.settings.set") settings[input.key] = input.value;
@@ -57,16 +64,38 @@ const peer = new JsonLinePeer(
   assert.equal(state("clock").timerRunning, false);
   assert.equal(state("date").timerRunning, false);
   assert.notEqual(state("clock").windowHandle, state("date").windowHandle);
-  assert.deepEqual(calls.filter((c) => c.method === "host.settings.options").map((c) => c.input.key).sort(), ["dateMonitor", "monitor"]);
-  Object.assign(settings, { showDate: true, dateFontSize: 80, dateFormat: "yyyy/MM/dd", dateAlignment: "bottom-right", dateVerticalMargin: 30 });
+  assert.deepEqual(
+    calls
+      .filter((c) => c.method === "host.settings.options")
+      .map((c) => c.input.key)
+      .sort(),
+    ["dateMonitor", "monitor"],
+  );
+  Object.assign(settings, {
+    showDate: true,
+    dateFontSize: 80,
+    dateFormat: "yyyy/MM/dd",
+    dateAlignment: "bottom-right",
+    dateVerticalMargin: 30,
+  });
   await peer.request("settings.changed", settings);
-  await until(() => state("date").visible && !state("clock").visible, "date-only display");
+  await until(
+    () => state("date").visible && !state("clock").visible,
+    "date-only display",
+  );
   assert.equal(state("date").fontSize, 80);
   assert.match(state("date").text, /^\d{4}\/\d{2}\/\d{2}$/);
   assert.equal(state("date").alignment, "bottom-right");
-  Object.assign(settings, { visible: true, fontSize: 120, secondsFontSize: 60 });
+  Object.assign(settings, {
+    visible: true,
+    fontSize: 120,
+    secondsFontSize: 60,
+  });
   await peer.request("settings.changed", settings);
-  await until(() => state("clock").visible && state("date").visible, "both displays");
+  await until(
+    () => state("clock").visible && state("date").visible,
+    "both displays",
+  );
   assert.equal(state("clock").fontSize, 120);
   assert.equal(state("clock").secondsFontSize, 60);
   settings.secondsFontSize = 90;
@@ -74,15 +103,31 @@ const peer = new JsonLinePeer(
   assert.equal(state("clock").fontSize, 120);
   assert.equal(state("clock").secondsFontSize, 90);
   assert.equal(state("date").fontSize, 80);
-  for (const anchor of ["top", "top-center", "top-right", "bottom", "bottom-center", "bottom-right"]) {
+  for (const anchor of [
+    "top",
+    "top-center",
+    "top-right",
+    "bottom",
+    "bottom-center",
+    "bottom-right",
+  ]) {
     settings.alignment = anchor;
     settings.dateAlignment = anchor;
     await peer.request("settings.changed", settings);
-    await until(() => [state("clock"), state("date")].every((s) => {
-      const expected = anchor.endsWith("-right") ? s.windowWidth - s.horizontalMargin - s.contentWidth
-        : anchor.endsWith("-center") ? (s.windowWidth - s.contentWidth) / 2 : s.horizontalMargin;
-      return s.alignment === anchor && Math.abs(s.contentLeft - expected) < 2;
-    }), `native content anchor ${anchor}`);
+    await until(
+      () =>
+        [state("clock"), state("date")].every((s) => {
+          const expected = anchor.endsWith("-right")
+            ? s.windowWidth - s.horizontalMargin - s.contentWidth
+            : anchor.endsWith("-center")
+              ? (s.windowWidth - s.contentWidth) / 2
+              : s.horizontalMargin;
+          return (
+            s.alignment === anchor && Math.abs(s.contentLeft - expected) < 2
+          );
+        }),
+      `native content anchor ${anchor}`,
+    );
   }
   settings.showDate = false;
   await peer.request("settings.changed", settings);
@@ -90,19 +135,19 @@ const peer = new JsonLinePeer(
   assert.equal(state("date").visible, false);
   settings.visible = false;
   await peer.request("settings.changed", settings);
-  assert.equal(calls.filter((c) => c.method === "host.notifications.publish").length, 0);
-  assert(panel.facts.some((f) => f.label === "フォント" && f.value === "Segoe UI"));
+  assert.equal(
+    calls.filter((c) => c.method === "host.notifications.publish").length,
+    0,
+  );
+  assert.equal(state("clock").font, "Segoe UI");
   settings.fontFamily = "Missing Font Fixture";
   await peer.request("settings.changed", settings);
   assert.equal(
     calls.filter((c) => c.method === "host.notifications.publish").length,
     0,
   );
-  assert(
-    panel.facts.some(
-      (f) => f.label === "フォント" && f.value.includes("Segoe UI"),
-    ),
-  );
+  assert.equal(state("clock").font, "Segoe UI");
+  assert.equal(state("clock").fontInstalled, false);
   settings.opacity = 0.5;
   await peer.request("settings.changed", settings);
   assert.equal(
@@ -111,8 +156,10 @@ const peer = new JsonLinePeer(
   );
   settings.fontFamily = "";
   await peer.request("settings.changed", settings);
-  assert(panel.facts.some((f) => f.label === "フォント" && f.value === "Segoe UI"));
-  await assert.rejects(peer.request("command.execute", { id: "at365.watch.font-information" }));
+  assert.equal(state("clock").font, "Segoe UI");
+  await assert.rejects(
+    peer.request("command.execute", { id: "at365.watch.font-information" }),
+  );
   assert.equal(calls.filter((c) => c.method === "host.browser.open").length, 0);
   const setCalls = () =>
     calls.filter((c) => c.method === "host.settings.set").length;
@@ -142,15 +189,33 @@ const peer = new JsonLinePeer(
     }
   }
   await peer.request("settings.changed", settings);
-  assert(
-    panel.facts.some((f) => f.label === "フォント" && f.value === "Arial"),
-    JSON.stringify(panel.facts),
-  );
+  assert.equal(state("clock").font, "Arial");
   await peer.request("deactivate");
-  assert.equal(calls.filter((c) => c.method.startsWith("host.notifications.")).length, 0);
+  assert.equal(
+    calls.filter((c) => c.method.startsWith("host.notifications.")).length,
+    0,
+  );
   child.stdin.end();
   assert.equal(await exited, 0, diagnostics);
-  fs.writeFileSync(path.join(probe, "result.json"), JSON.stringify({ ok: true, exe, checks: ["defaults off", "independent visibility", "independent sizes", "date format and six native anchors", "font fallback and dialog", "clean shutdown"] }, null, 2));
+  fs.writeFileSync(
+    path.join(probe, "result.json"),
+    JSON.stringify(
+      {
+        ok: true,
+        exe,
+        checks: [
+          "defaults off",
+          "independent visibility",
+          "independent sizes",
+          "date format and six native anchors",
+          "font fallback and dialog",
+          "clean shutdown",
+        ],
+      },
+      null,
+      2,
+    ),
+  );
   console.log(
     "PASS empty default / missing font fallback without notification calls / removed information command / real font dialog cancel and OK / settings reflection / clean stop",
   );
