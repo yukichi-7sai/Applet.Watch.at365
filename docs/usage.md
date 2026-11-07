@@ -10,7 +10,7 @@
 
 ## 動作環境
 
-Windows x64とAppDock.at365 **v0.180.0以降**が必要です。
+Windows x64、AppDock.at365 **v0.180.0以降**、PCにインストールされた **.NET 10 Desktop Runtime（Windows x64）** が必要です。本体と同じ共有ランタイムを使用し、Appletには同梱しません。通常の.NET RuntimeだけではWPF/WinFormsを実行できません。
 
 ## 導入・更新
 

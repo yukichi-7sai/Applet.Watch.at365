@@ -14,17 +14,17 @@
     <StartupObject>Applets.Watch.Program</StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Resources/Watch.ico</ApplicationIcon>
-    <Version>0.6.0</Version>
+    <Version>0.6.1</Version>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <SelfContained>true</SelfContained>
+    <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../AppDock.at365/dotnet/AppDock.Runtime/AppDock.Runtime.csproj" />
     <None Remove="Resources/Hatten.ttf" />
   </ItemGroup>
+  <Import Project="../../AppDock.at365/dotnet/Directory.Build.targets" />
 </Project>

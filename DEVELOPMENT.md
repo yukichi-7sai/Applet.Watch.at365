@@ -32,7 +32,9 @@ extensions/Applet.Watch.at365/
 └─ Applet.Watch.at365.exe
 ```
 
-AppletはWPFで時計を描画するself-contained単一EXEです。AppDockはAppletの起動・停止・設定・コマンドを管理し、時計の描画、透過、クリック透過、モニター配置はApplet自身が担当します。配布先PCに.NETランタイムは不要です。
+AppletはWPFで時計を描画するframework-dependent単一EXEです。AppDockはAppletの起動・停止・設定・コマンドを管理し、時計の描画、透過、クリック透過、モニター配置はApplet自身が担当します。配布先PCにインストールされた.NET 10 Desktop Runtime（Windows x64）を使用します。
+
+.NETランタイムを同梱しない方針と発行検証は[共通発行手順](../AppDock.at365/docs/publishing.md#netランタイムの共通方針)に従います。プロジェクトから共通の`dotnet/Directory.Build.targets`をimportし、発行時の自己完結指定を拒否します。
 
 ## 検証
 

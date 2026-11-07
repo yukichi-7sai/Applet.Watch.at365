@@ -1,5 +1,16 @@
 # 検証記録
 
+## 2026-11-07 共有Desktop Runtimeへ変更（0.6.1）
+
+- cleanなmainから`pull --ff-only`で最新を確認。WPF/WinForms・設定・保存・公開API・最低本体0.180.0を維持し、framework-dependent単一EXEへ変更した。プロジェクトとpublish.ps1を同梱なしに揃え、自己完結時専用の圧縮設定を除去した。配布方法のみの変更で、本体が既に要求するDesktop Runtimeを使用するためパッチ更新とした。
+- 本体の共通`Directory.Build.targets`をimportし、SelfContained/PublishSelfContained/PublishAotのtrue指定を3件とも拒否。開発文書と動作環境を共有方針へ接続した。発行前に差分・単一EXE/更新ZIP・既存契約への影響をレビューし、圧縮設定と試験トレースの上書きを修正して阻害事項なしと確認した。
+- Release solution buildは警告/エラー0、標準回帰24/24成功。最初の制限環境ではNuGet脆弱性情報の取得がNU1900で失敗したため、失敗ログを保持し、通常ユーザー環境で同じbuildを再実行して成功した。依存更新・検査の無効化は行っていない。
+- `publish.bat`成功。埋め込みruntimeconfigはMicrosoft.NETCore.App/WindowsDesktop.App 10.0.0の共有framework参照で、includedFrameworksとランタイムDLLの同梱なし。実起動のhost traceでPC側共有ランタイムを確認し、EOFで終了0。空のDOTNET_ROOT_X64では2147516547で失敗し、環境のランタイムが必要であることを確認した。旧同梱EXEを新しい共通検査が拒否することも確認した。
+- 発行EXEのプロトコル試験で時計/日付、実フォントダイアログの取消/確定、設定反映・正常停止が成功。固定AppDock 0.180.0の隔離GUIは15群成功し、描画・クリック透過・非アクティブ表示・保存・再起動・MCP設定反映・無効化を確認した。GUIは`.artifacts/independent-display-ui-1794041776037/`、直接試験は`.artifacts/independent-protocol-1794041749998/`。
+- `A:\40.ARTIFACT\Applet.Watch.at365`へ0.6.1を発行。EXEは75,497,510→373,322 bytes、SHA256=`3c836084fb02f2978921ec7545b9fa20452b7a16b20383cbfd6e2b723b437c56`。update.zipは69,919,086→161,763 bytes、SHA256=`e06a186068daab86619e6f5ff4d2b5b768abe1e95187f9900641d849d1d65d2e`。ZIP全2ファイル・manifest/feed・実EXEの版/サイズ/ハッシュ一致。
+- 完全ログ・runtimeconfig・bundle一覧・host trace・整理は`.artifacts/shared-runtime-20261107/`。入力ハッシュ、発行前レビュー、配布照合は`../AppDock.at365/.artifacts/shared-runtime-20261107/`。成功結果をそのままコミット判定に使用し、stage/commit treeは各repoの`.artifacts/commit-validation-shared-runtime-20261107/`へ記録する。
+- 試験プロセス終了と配布元一致を確認し、今回のGUI専用Applet EXE 1個を削除した。残す証跡ファイルは削除前後のハッシュ一致、共用本体・過去の再利用/失敗/状態未分類の証跡は保持した。物理DPI変更・モニター抜差し・実サインイン/ロック・長期常駐は未確認。push・Release・実利用先配置は行わない。
+
 ## 2026-11-07 旧パネル送信の廃止（0.6.0）
 
 - 状態パネルの構築・送信とui capabilityを除去した。時計/日付のWPF表示、フォント選択、座標/表示設定、コマンド、共通ログと保存を保持した。プロトコル試験は実画面の診断snapshotで確認する。

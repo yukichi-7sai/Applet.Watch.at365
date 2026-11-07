@@ -5,7 +5,7 @@
   "displayName": "Watch",
   "icon": "clock",
   "tagline": "いつもの画面に、見やすい時計を。",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "minimumHostVersion": "0.180.0",
   "updateRepository": "yukichi-7sai/Applet.Watch.at365",
   "runtime": "native",
