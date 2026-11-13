@@ -4,3 +4,4 @@ publish/
 .artifacts/
 *.user
 /Applet.Watch/Resources/Hatten.ttf
+/publish.local.json

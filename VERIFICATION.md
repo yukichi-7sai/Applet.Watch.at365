@@ -1,5 +1,19 @@
 # 検証記録
 
+## 2026-11-14 コミット前の照合
+
+- 実装完了時に記録した134入力ファイルのSHA256が一致し、別作業の変更と既存stageがないことを確認。
+- 本repoは文書・Git除外・設定例だけの変更。リンクとdiff検査を再確認し、製品回帰・再発行は不要。
+- 発行済み8 ZIPのSHA256も一致し、検証済み配布物を維持。ローカル設定はGit管理外。照合後の変更は本検証記録の追記だけで、製品の追加修正・版更新・再発行なし。
+- 判定・成功ログ・stage/commit treeの照合記録は`.artifacts/commit-validation-publish-paths-20261114/`へ保存。コミットは対象ファイルに限定し、push・Release・実利用先配置は行わない。
+
+## 2026-11-14 発行先のローカル設定と公開記録の整理
+
+- 環境固有の出力先をGit管理外`publish.local.json`へ分離。相対値は設定ファイル基準、未設定時は各repo内`.artifacts/publish`。worktree専用の出力名と既存の明示出力先指定を維持。
+- 公開するコード・文書・検証記録から環境固有の出力名を除去。以前の記録は論理パスへ置換し、元の記録を各repoの`.artifacts/publish-paths-private-20261114/original/`へ保存。Git履歴は変更していない。
+- 本repoの変更は公開文書・検証記録・ローカル設定のGit除外。製品コード・版・配布内容の変更はなく、再発行/製品回帰は不要。共有発行先ヘルパーは本体の5項目で検証し、参照リンクとdiff検査を確認。
+
+
 ## 2026-11-07 共有Desktop Runtimeへ変更（0.6.1）
 
 - cleanなmainから`pull --ff-only`で最新を確認。WPF/WinForms・設定・保存・公開API・最低本体0.180.0を維持し、framework-dependent単一EXEへ変更した。プロジェクトとpublish.ps1を同梱なしに揃え、自己完結時専用の圧縮設定を除去した。配布方法のみの変更で、本体が既に要求するDesktop Runtimeを使用するためパッチ更新とした。
@@ -7,7 +21,7 @@
 - Release solution buildは警告/エラー0、標準回帰24/24成功。最初の制限環境ではNuGet脆弱性情報の取得がNU1900で失敗したため、失敗ログを保持し、通常ユーザー環境で同じbuildを再実行して成功した。依存更新・検査の無効化は行っていない。
 - `publish.bat`成功。埋め込みruntimeconfigはMicrosoft.NETCore.App/WindowsDesktop.App 10.0.0の共有framework参照で、includedFrameworksとランタイムDLLの同梱なし。実起動のhost traceでPC側共有ランタイムを確認し、EOFで終了0。空のDOTNET_ROOT_X64では2147516547で失敗し、環境のランタイムが必要であることを確認した。旧同梱EXEを新しい共通検査が拒否することも確認した。
 - 発行EXEのプロトコル試験で時計/日付、実フォントダイアログの取消/確定、設定反映・正常停止が成功。固定AppDock 0.180.0の隔離GUIは15群成功し、描画・クリック透過・非アクティブ表示・保存・再起動・MCP設定反映・無効化を確認した。GUIは`.artifacts/independent-display-ui-1794041776037/`、直接試験は`.artifacts/independent-protocol-1794041749998/`。
-- `A:\40.ARTIFACT\Applet.Watch.at365`へ0.6.1を発行。EXEは75,497,510→373,322 bytes、SHA256=`3c836084fb02f2978921ec7545b9fa20452b7a16b20383cbfd6e2b723b437c56`。update.zipは69,919,086→161,763 bytes、SHA256=`e06a186068daab86619e6f5ff4d2b5b768abe1e95187f9900641d849d1d65d2e`。ZIP全2ファイル・manifest/feed・実EXEの版/サイズ/ハッシュ一致。
+- `<PUBLISH_ROOT>\Applet.Watch.at365`へ0.6.1を発行。EXEは75,497,510→373,322 bytes、SHA256=`3c836084fb02f2978921ec7545b9fa20452b7a16b20383cbfd6e2b723b437c56`。update.zipは69,919,086→161,763 bytes、SHA256=`e06a186068daab86619e6f5ff4d2b5b768abe1e95187f9900641d849d1d65d2e`。ZIP全2ファイル・manifest/feed・実EXEの版/サイズ/ハッシュ一致。
 - 完全ログ・runtimeconfig・bundle一覧・host trace・整理は`.artifacts/shared-runtime-20261107/`。入力ハッシュ、発行前レビュー、配布照合は`../AppDock.at365/.artifacts/shared-runtime-20261107/`。成功結果をそのままコミット判定に使用し、stage/commit treeは各repoの`.artifacts/commit-validation-shared-runtime-20261107/`へ記録する。
 - 試験プロセス終了と配布元一致を確認し、今回のGUI専用Applet EXE 1個を削除した。残す証跡ファイルは削除前後のハッシュ一致、共用本体・過去の再利用/失敗/状態未分類の証跡は保持した。物理DPI変更・モニター抜差し・実サインイン/ロック・長期常駐は未確認。push・Release・実利用先配置は行わない。
 
@@ -35,7 +49,7 @@
 
 ## 2026-11-03 開発用配置スクリプトの除去
 
-- deployment一式と40.ARTIFACT内の配置用スクリプト・記入例・配置先設定を、存在する範囲で削除した。publishから専用コピー処理を外し、開発文書と不要なGit除外規則を整理した。
+- deployment一式と<PUBLISH_ROOT>内の配置用スクリプト・記入例・配置先設定を、存在する範囲で削除した。publishから専用コピー処理を外し、開発文書と不要なGit除外規則を整理した。
 - 差分レビューで既存のビルドと更新ZIP/JSON生成を保持していることを確認した。変更スクリプトの構文・現行の廃止ファイル参照・git diff --checkと、本体を含む全9repoの発行先計算を確認した。発行先の配置ツール以外のファイルは削除前後のSHA256が一致した。
 - 製品コード・manifest・依存・設定/保存仕様と配布payloadは変更していない。開発用配置ツールの整理として製品版更新・再ビルド・再発行なし。製品回帰・GUI・実利用先配置・commit・push・Releaseは実施していない。共通の削除一覧・ハッシュ・検証結果は../AppDock.at365/.artifacts/deploy-removal-20261103/を参照する。過去の検証記録は履歴として保持する。
 
@@ -89,7 +103,7 @@
 - 診断キューは64行で、固定の起動経路はこの範囲内。UIはログ応答を待たず、終了時の排出待ちは最大250ms。ログ拒否・無応答は再送せず、元の起動結果を保持する。設定値・フォント名・ユーザー名・パス・生の例外は新規ログへ出さない。設定変更や毎秒の描画では診断ログを出さない。
 - 発行前に実装差分と影響先をレビューし、阻害指摘なし。時計/日付の独立表示、フォント代替と保存、既存ホスト通信、15秒期限と起動待ち設定を維持。設定・保存ファイル・公開API・依存の変更なしのためパッチ更新。AppDock本体・SDK/Runtimeの製品ソースは変更なし。
 - Release buildは警告0/エラー0。標準回帰24/24成功（既存21＋診断ログの順序/時刻、送信失敗、無応答の排出期限3件）。開発EXEと発行済みEXEでそれぞれ起動試験6条件が成功：非表示、両表示、モニター候補送信の応答待ち中に段階ログ到達、起動失敗時の直前段階、ログ送信拒否、ログ無応答。設定反映でログが増えないことと、設定値をログに含めないことも確認。
-- Watch 0.5.5を既定の40.ARTIFACTへpublish成功。固定AppDock 0.109.1との隔離GUI15項目成功。Watchのsource/infoで共通ログへ最初から完了まで届くこと、既存の表示/時計更新/クリック透過/非活性、設定確定・Escape取消・再起動保持、フォント選択の確定/取消、MCP公開15項目と非公開モニター2項目、停止/終了を確認。新しいログの確認以外は既存UI試験を利用した。
+- Watch 0.5.5を既定の<PUBLISH_ROOT>へpublish成功。固定AppDock 0.109.1との隔離GUI15項目成功。Watchのsource/infoで共通ログへ最初から完了まで届くこと、既存の表示/時計更新/クリック透過/非活性、設定確定・Escape取消・再起動保持、フォント選択の確定/取消、MCP公開15項目と非公開モニター2項目、停止/終了を確認。新しいログの確認以外は既存UI試験を利用した。
 - manifest/EXE/feedの0.5.5とZIP全2ファイルのサイズ/SHA256が一致。EXE SHA256: `42d9c57c57249e3b0e740d793ea46d316132677faccb7ffd762e748f8effa1b5`、ZIP SHA256: `bed6027501e15fd694979fcb9ee7d4cd71eaae30eb2512f68019bf2743150290`。既存の配置スクリプト/ローカル配置先ファイルはハッシュ不変。
 - 証跡は`.artifacts/startup-diagnostics-20261031/`の`review.json`、`build.log`、`regression.log`、`startup-development.log`、`publish.log`、`startup-published.log`、`ui-published.log`、`package-result.json`、`inputs.json`、`validation.json`。段階ログは開発`.artifacts/startup-protocol-1793424752628/`、発行済み`.artifacts/startup-protocol-1793424888090/`の各条件フォルダーへ保存。固定GUIは`.artifacts/independent-display-ui-1793424893426/`の`result.json`と`startup-log.json`。
 - 整理は終了/成功/パス/プロセス/再解析ポイントを確認し、旧成功GUI `independent-display-ui-1793337532502`の本体管理対象692ファイルだけ削除。記録109ファイルのハッシュ一致と最新成功コピーの保持を確認。失敗試行・過去の参照中検証記録・起動試験2回を保持。`cleanup.json`参照。
@@ -119,7 +133,7 @@
 
 - main clean/追跡先確認とpull --ff-only後に、フォント選択操作へ`settingKey: fontFamily`を追加。入力とボタンを同じFieldへ配置し、狭幅は折り返す。時計/日付の表示descriptionへ、それぞれの生成済みtoggleコマンドのリンクを追加した。リンクは対象を選んだパレットを開き、明示実行まで値を変えない。本体共通拡張を利用し、Watch固有フォーム/CSSやネイティブ処理は追加しない。
 - 発行前レビューで本体0.105.2の契約、設定/コマンドID/既定値/保存/MCPの不変、フォント選択の実行経路を確認し阻害事項なし。表示metadataと説明のみの変更として0.5.2→0.5.3、minimumHostVersionも0.105.2へ更新した。C#・回帰コード・SDK/Runtimeの29入力が先行検証時のSHA256と一致し、標準回帰21件を再利用。模擬RPCの全再試験は行わず、発行EXEと実ホストのGUIで今回影響する操作を検証した。
-- publish.bat終了コード0。ソース/配布/ZIPのmanifest、minimumHostVersion、EXE ProductVersion、feedが一致し、ZIPサイズ/SHA256と全2ファイルの一致、deploy.batの保持を確認。配布先は`A:\40.ARTIFACT\Applet.Watch.at365`。
+- publish.bat終了コード0。ソース/配布/ZIPのmanifest、minimumHostVersion、EXE ProductVersion、feedが一致し、ZIPサイズ/SHA256と全2ファイルの一致、deploy.batの保持を確認。配布先は`<PUBLISH_ROOT>\Applet.Watch.at365`。
 - 固定AppDock0.105.2との隔離GUI14群成功。同じFieldに入力と選択ボタンが各1つ存在し、操作の検索識別子も維持。入力のblur確定→選択の取消、処理中無効化、キーボードで選択→Arial適用、Escape取消と再起動保持を確認。両descriptionのリンクは各toggle IDだけを選び、表示状態を変えず、Escapeでリンクへフォーカス復帰する。広幅/760pxの枠内配置と折り返しをPNGで目視確認した。
 - 両表示の初期OFF、個別表示/サイズ/モニター/位置/余白/日付書式、未導入フォントの無通知代替と保存値保持、通知項目なし、再起動/停止も成功。MCP公開15項目のschema/読取/変更、モニター2項目の非公開、不正値/書込不許可の拒否、dryRun、古いrevision拒否、生成コマンドと実プロセスへの反映を再確認した。MCPの仕様変更なし。
 - 証跡は`.artifacts/inline-font-actions-20261030/`の`reuse.json`、`inputs-build.json`、`inputs-after.json`、`publish.log`、`ui-published.log`、`validation.json`。GUIは`.artifacts/independent-display-ui-1793308040928/result.json`、本体レビュー/配布照合は`../AppDock.at365/.artifacts/inline-setting-actions-20261030/`。成功GUIの直近3回を保持し削除0。物理複数モニター/混在DPI等は今回の検証対象外。Pause/F13〜F24を登録/送信せず、実利用設定、commit/push/Release/deployは変更しない。
@@ -140,7 +154,7 @@
 - 最終Releaseビルドは警告0・エラー0。標準回帰21/21成功。最終差分で回帰対象のOptions/Layout/Fonts/Formatting・回帰コード・SDK入力のSHA256が不変であることを照合して成功を再利用した。空設定の両方OFF、明示ONの維持、各サイズと配置の独立、負座標/DPI換算、未接続モニター、書式と日付境界を含む。
 - 発行EXEの模擬ホストRPCは成功。両方OFFでタイマー停止、日付だけ/時計だけ/両方の表示、サイズ変更、6方向それぞれの実コンテンツ座標、モニター候補の2項目公開、フォント代替・標準FontDialogのOK/取消、通知API呼出し0、正常終了を確認した。
 - 固定AppDock 0.105.0の隔離コピーでGUI13群成功。両方の初期OFF、独立したON/OFFと時計/秒/日付サイズ、日付書式・位置・余白・モニター選択、保存と再起動復元、フォント入力のEscape取消、直下のボタンからの標準ダイアログ起動/取消、未導入フォントの保存値保持、760px幅で操作へ到達できること、15項目のMCP公開/型検証/権限/dryRun/revision競合、Applet無効化とホスト終了を確認。広幅・狭幅の画面と時計/日付の描画PNGを目視確認した。
-- 最終publishの終了コード0。ソース/配置/ZIPのmanifest、EXE ProductVersion、feedが0.5.2で一致。ZIP全2ファイルのサイズ/SHA256、既存deploy.bat/配置スクリプトの保持を確認。検証前後の全記録入力に差分なし。配布先は`A:\40.ARTIFACT\Applet.Watch.at365`。
+- 最終publishの終了コード0。ソース/配置/ZIPのmanifest、EXE ProductVersion、feedが0.5.2で一致。ZIP全2ファイルのサイズ/SHA256、既存deploy.bat/配置スクリプトの保持を確認。検証前後の全記録入力に差分なし。配布先は`<PUBLISH_ROOT>\Applet.Watch.at365`。
 - 証跡は`.artifacts/independent-display-20261030/`の`inputs-final.json`・`review-final.json`・`build-052.log`・`regression.log`・`protocol-published-052.log`・`ui-published-052.log`・`package-result.json`・`validation.json`・`log-hashes.json`。最終GUIは`.artifacts/independent-display-ui-1793306710803/result.json`。先行試行のログも区別して保持。試験方式別の最新3回を残す整理結果は`cleanup.json`を参照する。GUI2回と既存再利用証跡は保持した。
 - 実機は3840×2160・DPI144の1モニター。物理的な別モニター同時表示、混在DPI、モニター抜き差し、スリープ/RDPは未確認。Pause/F13〜F24の送信・OS登録は行っていない。実利用設定・他Applet・本体製品ソースの変更、commit/push、GitHub Release、実利用先deployは行っていない。
 
@@ -154,7 +168,7 @@
 ## 2026-10-29: Applet情報のアイコンとキャッチコピー 0.4.1
 
 - main/追跡先とcleanを確認し、通常環境のpull --ff-only後に、manifestの任意表示情報 `icon: clock` と `tagline: いつもの画面に、見やすい時計を。` を設定。設定・コマンド・保存・権限・最低本体版は変更せず、0.4.0→0.4.1のパッチ更新として関連する版の正本を揃えた。発行前にmetadataと版の差分をレビューし、阻害事項なし。
-- 標準publish.batで40.ARTIFACTへ発行。配置manifest/ZIP内manifest/feedのID・版・icon/tagline、ZIPのサイズ/SHA256を照合し成功。native/.NETはProductVersionも一致。本体0.101.6の固定EXEへ発行物をコピーし、停止状態で情報パネルの表示を確認した。通常のApplet起動や外部サービス・実入力は実行していない。
+- 標準publish.batで<PUBLISH_ROOT>へ発行。配置manifest/ZIP内manifest/feedのID・版・icon/tagline、ZIPのサイズ/SHA256を照合し成功。native/.NETはProductVersionも一致。本体0.101.6の固定EXEへ発行物をコピーし、停止状態で情報パネルの表示を確認した。通常のApplet起動や外部サービス・実入力は実行していない。
 - 共通の入力・完全ログ・配布照合は`../AppDock.at365/.artifacts/applet-branding-20261029/`、本体の`VERIFICATION.md`、本repoの`.artifacts/applet-branding-20261029/validation.json`を参照。機能別の標準全回帰は今回実行せず、表示情報と配布の影響に必要な範囲を検証した。既存の再利用資料を保持し、今回の整理による削除なし。コミット/プッシュ/Release/実利用deployは行っていない。
 
 ## 2026-10-28: フォント案内通知の削除（0.4.0）
@@ -222,7 +236,7 @@
 - 既存のdisplayName変更を確認。表示名はWatch、内部name／id／entry・設定・公開APIは保持。開始時はmainで未コミット変更があったため、自動pull／stashは行わず既存差分を保持した。通常修正としてパッチ番号を1つ更新。
 - 発行前にmanifest／版／発行スクリプトと影響先をレビューし、阻害指摘なし。レビュー記録は.artifacts/displayname-publish-20261026/review.json。
 - Release構成の既存回帰8/8成功。発行EXEの版一致と、時計を非表示にした隔離ホストで起動／停止成功。
-- publish.batは終了コード0。40.ARTIFACTの配布manifest／実行ファイル／update.jsonの版、ZIPの全エントリー・サイズ・SHA256と配布フォルダーの一致を確認。package-result.jsonに記録。既存deploy関連ファイルを保持。
+- publish.batは終了コード0。<PUBLISH_ROOT>の配布manifest／実行ファイル／update.jsonの版、ZIPの全エントリー・サイズ・SHA256と配布フォルダーの一致を確認。package-result.jsonに記録。既存deploy関連ファイルを保持。
 - 固定の発行済みAppDock 0.94.4へ4つの発行物をそのままコピーし、コピーhash一致、snapshotの内部名／表示名／版と管理画面の4行を確認。Watch／WebBrowserTools／WindowsToolsの起動・停止、ホストの終了コード0を確認。共通証跡は../Applet.WebBrowserTools.at365/.artifacts/displayname-publish-20261026/のpublished-smoke.cjs、smoke-result.json、displaynames.png、host-inputs.json。参照ソースはAppDock main 0.94.3で、固定EXEは0.94.4。
 - 各repoの同名.artifactsフォルダーへ入力hash、コマンド／終了コード、完全ログとそのhashを保存。検証後の製品入力は一致。使用方法と設計の版表記のみの文書修正は製品試験へ影響しない。ホスト全回帰／旧GUI全回帰／実ブラウザーや物理入力は変更範囲外として未実施。
 - 整理は各.artifacts直下を列挙してcleanup.jsonへ記録。今回の試験は同じ方式の成功1回として保持。他の古い資料は参照・実行方式・所有が確定しないため保持、削除0件。隔離ホストとAppletは終了済み。commit／push／Release／実利用deployなし。
@@ -230,7 +244,7 @@
 
 - 開始時main／clean、現在のorigin/mainからpull --ff-only成功（Already up to date）。更新元を`yukichi-7sai/Applet.Watch.at365`へ統一。既存updateRepositoryの旧アカウント名を置換。.NET発行ビルドとruntime/manifestの版一致を確認。
 
-- 発行前レビューは指摘なし。設定項目・保存ファイル・公開APIの追加削除なしのためパッチ更新。既存publish.batで自身の40.ARTIFACT配下へ発行成功。ZIP/feed/同梱manifestのID・版・size・SHA256・runtimeの存在が一致。
+- 発行前レビューは指摘なし。設定項目・保存ファイル・公開APIの追加削除なしのためパッチ更新。既存publish.batで自身の<PUBLISH_ROOT>配下へ発行成功。ZIP/feed/同梱manifestのID・版・size・SHA256・runtimeの存在が一致。
 
 - 最終AppDock 0.62.4 EXE（SHA256 043d72acd4f4176d0417bbc4166a111cecc5aaa7e8740baf21b8d6647b0e85ab）と最終Applet一式を隔離コピー。全6Appletを停止した状態で、保存済み旧指定の保持、新しい既定値の説明、版表示、「既定に戻す」後の画面／メモリ／settings.jsonの一致、停止状態維持を各Appletで確認。正常終了0。
 

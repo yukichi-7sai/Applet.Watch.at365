@@ -15,7 +15,7 @@ Windows x64、AppDock.at365 **v0.180.0以降**、PCにインストールされ�
 ## 導入・更新
 
 1. AppDockをトレイの「終了」から完全終了します。
-2. `A:/40.ARTIFACT/Applet.Watch.at365/Applet.Watch.at365/` を、AppDock.at365.exeの隣の `extensions/Applet.Watch.at365/` に配置します。
+2. `.artifacts/publish/Applet.Watch.at365/` を、AppDock.at365.exeの隣の `extensions/Applet.Watch.at365/` に配置します。
 3. AppDockを起動し、「Applet」一覧で **Applet.Watch.at365** を有効にします。
 
 更新時も配布物一式を置き換えてください。AppDockの`settings.json`に保存済みの設定は維持されます。

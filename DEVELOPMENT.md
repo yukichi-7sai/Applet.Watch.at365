@@ -4,7 +4,7 @@
 
 ## 発行先
 
-標準発行先は `A:\40.ARTIFACT\Applet.Watch.at365` です。`publish.bat`はソースrepoから実行します。詳細は[共通発行手順](../AppDock.at365/docs/publishing.md)を参照してください。
+標準発行先は `.artifacts/publish` です。`publish.bat`はソースrepoから実行します。詳細は[共通発行手順](../AppDock.at365/docs/publishing.md)を参照してください。
 
 実装時のテスト選択、コミット前の必要回帰、リリース前のコミット/プッシュ確認と検証証跡の再利用は、[本体・Applet共通手順](../AppDock.at365/docs/development-workflow.md)に従います。この文書の試験コマンドは、その段階に応じて実行します。
 
@@ -24,7 +24,7 @@ dotnet run --project Applet.Watch.RegressionTests -c Release
 
 `publish.bat`の第1引数には任意の発行先を指定できます。実利用先への配置時はAppDockを完全終了し、発行物を`extensions/Applet.Watch.at365`へコピーしてください。
 
-発行物は`A:/40.ARTIFACT/Applet.Watch.at365/Applet.Watch.at365/`に生成します。配置に必要なファイルは次の2つです。
+発行物は`.artifacts/publish/Applet.Watch.at365/`に生成します。配置に必要なファイルは次の2つです。
 
 ```text
 extensions/Applet.Watch.at365/
@@ -40,7 +40,7 @@ AppletはWPFで時計を描画するframework-dependent単一EXEです。AppDock
 
 ```powershell
 node scripts/test-ui.cjs
-node scripts/test-ui.cjs ../../40.ARTIFACT/AppDock.at365/win-unpacked/AppDock.at365.exe
+node scripts/test-ui.cjs ../AppDock.at365/.artifacts/publish/win-unpacked/AppDock.at365.exe
 ```
 
 UIテストは隔離profileへApplet EXEを配置し、時計と日付の独立表示・サイズ・位置・書式、フォント選択と代替表示、設定反映・コマンド・終了を検証します。Nodeはホストのtoolchain.jsonに従う`.tools/node/<version>/node.exe`を使います。実利用のAppDock設定、他のプロセス、壁紙、マウス位置を変更しません。検証範囲と未確認項目は[VERIFICATION.md](VERIFICATION.md)を参照してください。
