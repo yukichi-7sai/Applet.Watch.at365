@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "applet",
+  "id": "at365.watch",
+  "version": "0.6.1",
+  "minimumHostVersion": "0.180.0",
+  "release": {
+    "tag": "v0.6.1",
+    "publishedAt": "2026-11-16T22:31:41Z"
+  },
+  "payload": {
+    "file": "update.zip",
+    "sha256": "e06a186068daab86619e6f5ff4d2b5b768abe1e95187f9900641d849d1d65d2e",
+    "size": 161763,
+    "format": "zip",
+    "url": "https://github.com/yukichi-7sai/Applet.Watch.at365/releases/download/v0.6.1/update.zip"
+  }
+}
